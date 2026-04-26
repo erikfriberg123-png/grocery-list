@@ -1,11 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
+import QRCode from 'react-native-qrcode-svg';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -24,6 +26,7 @@ import {
   useReorderItem,
   useToggleItem,
 } from '@/src/features/items/use-items';
+import { useShareLink, EXPIRY_OPTIONS } from '@/src/features/sharing/use-share-link';
 
 type Item = {
   id: string;
@@ -139,6 +142,86 @@ function CategoryHeader({ category, count }: { category: string; count: number }
   );
 }
 
+function ShareSheet({ listId, onClose }: { listId: string; onClose: () => void }) {
+  const { t } = useTranslation();
+  const [selectedDays, setSelectedDays] = useState<number | null>(7);
+  const { shareUrl, loading, error, copied, createLink, copyLink } = useShareLink(listId);
+
+  return (
+    <Modal visible transparent animationType="slide">
+      <Pressable style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }} onPress={onClose}>
+        <Pressable style={{ backgroundColor: Colors.cream, borderRadius: 24, padding: 24, paddingBottom: 40 }}>
+          {/* Handle */}
+          <View style={{ width: 36, height: 4, backgroundColor: Colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: 20 }} />
+
+          <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 22, color: Colors.greenDark, marginBottom: 20 }}>
+            {t('share.title')}
+          </Text>
+
+          {/* Expiry picker */}
+          <Text style={{ fontSize: 12, fontWeight: '700', color: Colors.muted, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 }}>
+            Giltighetstid
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
+            {EXPIRY_OPTIONS.map((opt) => {
+              const active = selectedDays === opt.days;
+              return (
+                <Pressable
+                  key={String(opt.days)}
+                  onPress={() => setSelectedDays(opt.days)}
+                  style={{
+                    flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: 'center',
+                    borderWidth: active ? 2 : 1,
+                    borderColor: active ? Colors.green : Colors.border,
+                    backgroundColor: active ? `${Colors.green}12` : Colors.creamCard,
+                  }}>
+                  <Text style={{ fontSize: 12, fontWeight: active ? '700' : '500', color: active ? Colors.green : Colors.text }}>
+                    {opt.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          {/* Create button */}
+          {!shareUrl && (
+            <Pressable
+              style={{ backgroundColor: Colors.green, borderRadius: 14, paddingVertical: 14, alignItems: 'center', marginBottom: 8 }}
+              onPress={() => createLink(selectedDays)}
+              disabled={loading}>
+              {loading
+                ? <ActivityIndicator color="white" />
+                : <Text style={{ color: 'white', fontWeight: '600', fontSize: 15 }}>{t('share.title')}</Text>}
+            </Pressable>
+          )}
+
+          {error && (
+            <Text style={{ color: '#c0392b', fontSize: 13, textAlign: 'center', marginBottom: 8 }}>{error}</Text>
+          )}
+
+          {/* QR + copy once link exists */}
+          {shareUrl && (
+            <View style={{ alignItems: 'center', gap: 16 }}>
+              <View style={{ backgroundColor: 'white', padding: 16, borderRadius: 16, borderWidth: 1, borderColor: Colors.border }}>
+                <QRCode value={shareUrl} size={180} color={Colors.greenDark} backgroundColor="white" />
+              </View>
+              <Text style={{ fontSize: 12, color: Colors.muted, textAlign: 'center' }} numberOfLines={2}>{shareUrl}</Text>
+              <Pressable
+                style={{ backgroundColor: copied ? Colors.greenLight : Colors.green, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 32, flexDirection: 'row', alignItems: 'center', gap: 8 }}
+                onPress={copyLink}>
+                <Ionicons name={copied ? 'checkmark' : 'copy-outline'} size={16} color={copied ? Colors.greenDark : 'white'} />
+                <Text style={{ color: copied ? Colors.greenDark : 'white', fontWeight: '600', fontSize: 15 }}>
+                  {copied ? 'Kopierad!' : t('share.copy_link')}
+                </Text>
+              </Pressable>
+            </View>
+          )}
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
 export default function ListDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
@@ -152,6 +235,7 @@ export default function ListDetail() {
 
   const [input, setInput]       = useState('');
   const [addError, setAddError] = useState('');
+  const [showShare, setShowShare] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
   const handleAdd = async () => {
@@ -293,7 +377,9 @@ export default function ListDetail() {
           <Ionicons name="chevron-back" size={22} color={Colors.green} />
           <Text style={{ color: Colors.green, fontSize: 16, fontWeight: '500' }}>{t('list.back')}</Text>
         </Pressable>
-        <Pressable style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.creamCard, borderWidth: 1, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center', marginRight: 8 }}>
+        <Pressable
+          style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.creamCard, borderWidth: 1, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center', marginRight: 8 }}
+          onPress={() => setShowShare(true)}>
           <Ionicons name="share-outline" size={18} color={Colors.greenDark} />
         </Pressable>
       </View>
@@ -378,6 +464,8 @@ export default function ListDetail() {
         ListEmptyComponent={isLoading ? <ActivityIndicator color={Colors.green} style={{ marginTop: 40 }} /> : null}
         contentContainerStyle={{ paddingBottom: 32 }}
       />
+
+      {showShare && <ShareSheet listId={id} onClose={() => setShowShare(false)} />}
     </KeyboardAvoidingView>
   );
 }
