@@ -166,7 +166,8 @@ export default function ListDetail() {
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 8, paddingTop: 52, paddingBottom: 4 }}>
         <Pressable
           style={{ flexDirection: 'row', alignItems: 'center', gap: 4, padding: 8 }}
-          onPress={() => router.back()}>
+          onPress={() => router.canGoBack() ? router.back() : router.replace('/')}>
+
           <Ionicons name="chevron-back" size={22} color={Colors.green} />
           <Text style={{ color: Colors.green, fontSize: 16, fontWeight: '500' }}>Listor</Text>
         </Pressable>
