@@ -9,6 +9,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { supabase } from '@/src/lib/supabase';
 import { useAuthStore } from '@/src/features/auth/store';
@@ -54,16 +55,18 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthGate />
-      <Stack>
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="list/[id]" options={{ headerShown: false }} />
-        <Stack.Screen name="guest/[token]" options={{ headerShown: false }} />
-        <Stack.Screen name="import" options={{ headerShown: false }} />
-      </Stack>
-      <StatusBar style="dark" />
-    </QueryClientProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <AuthGate />
+        <Stack>
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="list/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="guest/[token]" options={{ headerShown: false }} />
+          <Stack.Screen name="import" options={{ headerShown: false }} />
+        </Stack>
+        <StatusBar style="dark" />
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }

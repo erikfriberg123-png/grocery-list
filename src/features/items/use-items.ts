@@ -101,6 +101,32 @@ export function useClearChecked() {
   });
 }
 
+export function useReorderItem() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      listId,
+      category,
+      sortOrder,
+    }: {
+      id: string;
+      listId: string;
+      category: string | null;
+      sortOrder: number;
+    }) => {
+      const { error } = await supabase
+        .from('shopping_items')
+        .update({ category, sort_order: sortOrder, updated_at: new Date().toISOString() })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: (_data, { listId }) =>
+      qc.invalidateQueries({ queryKey: ['items', listId] }),
+  });
+}
+
 export function useUpdateItem() {
   const qc = useQueryClient();
 
