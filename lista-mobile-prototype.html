@@ -1,0 +1,1991 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Lista — Smart inköpslista</title>
+<style>
+  /* ---------- Reset & base ---------- */
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    background: #e8e4dc;
+    color: #2b2b2b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    overflow-x: hidden;
+  }
+
+  /* ---------- Phone frame (desktop preview) ---------- */
+  .phone {
+    width: 390px;
+    height: 844px;
+    background: #faf8f3;
+    border-radius: 48px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.25), 0 0 0 12px #1a1a1a, 0 0 0 14px #2a2a2a;
+    position: relative;
+    overflow: hidden;
+  }
+  .phone::before {
+    content: "";
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 32px;
+    background: #1a1a1a;
+    border-radius: 20px;
+    z-index: 1000;
+  }
+
+  /* On mobile, show full-screen */
+  @media (max-width: 480px) {
+    body { padding: 0; background: #faf8f3; }
+    .phone {
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .phone::before { display: none; }
+    .status-bar { display: none; }
+    .screen { padding-top: env(safe-area-inset-top, 16px) !important; }
+  }
+
+  .status-bar {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px 0 32px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    position: relative;
+    z-index: 2;
+  }
+  .status-icons { display: flex; gap: 6px; align-items: center; }
+  .status-icons svg { width: 18px; height: 12px; }
+
+  /* ---------- Screens ---------- */
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background: #faf8f3;
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease;
+    transform: translateX(100%);
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .screen.active {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .screen.exiting-left {
+    transform: translateX(-25%);
+    opacity: 0.4;
+  }
+
+  .screen-content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ---------- Colors ---------- */
+  :root {
+    --green: #3a5a40;
+    --green-dark: #2d4733;
+    --green-light: #d8e2d4;
+    --cream: #faf8f3;
+    --cream-card: #ffffff;
+    --border: #e8e3d8;
+    --text: #2b2b2b;
+    --text-muted: #8a8475;
+    --serif: "Cormorant Garamond", "Garamond", "Times New Roman", serif;
+
+    --cat-produce: #7ba05b;
+    --cat-dairy: #6b9bc4;
+    --cat-meat: #c47b6b;
+    --cat-pantry: #c49b5e;
+    --cat-bakery: #d4a373;
+    --cat-frozen: #88b8d4;
+    --cat-drinks: #a584c4;
+    --cat-snacks: #d4a373;
+    --cat-other: #a8a29e;
+  }
+
+  /* ---------- Typography ---------- */
+  h1.serif { font-family: var(--serif); font-weight: 500; letter-spacing: -0.5px; }
+  h2.serif { font-family: var(--serif); font-weight: 500; letter-spacing: -0.3px; }
+
+  /* ---------- ONBOARDING ---------- */
+  .onboarding {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: linear-gradient(180deg, #faf8f3 0%, #f0ece0 100%);
+  }
+  .onboarding-slides {
+    flex: 1;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .onboarding-slides::-webkit-scrollbar { display: none; }
+  .onboarding-slide {
+    min-width: 100%;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 32px;
+    text-align: center;
+  }
+  .onboarding-illustration {
+    width: 220px;
+    height: 220px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(58, 90, 64, 0.08);
+  }
+  .onboarding-illustration svg { width: 130px; height: 130px; }
+  .onboarding-title {
+    font-family: var(--serif);
+    font-size: 32px;
+    font-weight: 500;
+    color: var(--green-dark);
+    margin-bottom: 16px;
+    line-height: 1.15;
+  }
+  .onboarding-text {
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--text-muted);
+    max-width: 300px;
+  }
+  .onboarding-footer {
+    padding: 24px 32px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+  }
+  .onboarding-dots {
+    display: flex;
+    gap: 8px;
+  }
+  .onboarding-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(58, 90, 64, 0.2);
+    transition: all 0.3s ease;
+  }
+  .onboarding-dot.active {
+    background: var(--green);
+    width: 24px;
+    border-radius: 4px;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    border: none;
+    border-radius: 14px;
+    padding: 16px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-primary {
+    background: var(--green);
+    color: white;
+    width: 100%;
+  }
+  .btn-primary:active { background: var(--green-dark); transform: scale(0.98); }
+  .btn-secondary {
+    background: white;
+    color: var(--green-dark);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:active { background: #f5f1e8; }
+  .btn-text {
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    font-weight: 500;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 15px;
+  }
+
+  /* ---------- AUTH ---------- */
+  .auth-screen {
+    padding: 32px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .auth-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 32px;
+    margin-bottom: 48px;
+  }
+  .auth-logo-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--green);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .auth-logo-text { font-family: var(--serif); font-size: 28px; font-weight: 500; color: var(--green-dark); }
+
+  .form-group { margin-bottom: 16px; }
+  .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-input {
+    width: 100%;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    font-size: 16px;
+    background: white;
+    font-family: inherit;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--green); }
+
+  /* ---------- App tab bar ---------- */
+  .tab-bar {
+    height: 84px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    padding-top: 8px;
+  }
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 0;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.2s;
+  }
+  .tab-item.active { color: var(--green); }
+  .tab-item svg { width: 24px; height: 24px; }
+  .tab-item span { font-size: 10px; font-weight: 600; }
+
+  /* ---------- Lists overview ---------- */
+  .header {
+    padding: 16px 24px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .header-logo {
+    width: 36px;
+    height: 36px;
+    background: var(--green);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .header-title { font-family: var(--serif); font-size: 20px; font-weight: 500; color: var(--green-dark); }
+  .header-actions { display: flex; gap: 8px; }
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .icon-btn:active { background: #f5f1e8; }
+  .icon-btn svg { width: 18px; height: 18px; color: var(--green-dark); }
+
+  .page-title-section {
+    padding: 8px 24px 20px;
+  }
+  .page-title { font-family: var(--serif); font-size: 36px; font-weight: 500; color: var(--green-dark); line-height: 1.1; }
+  .page-subtitle { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+  .list-card {
+    background: white;
+    border-radius: 16px;
+    padding: 18px;
+    margin: 0 24px 12px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    border: 1px solid var(--border);
+  }
+  .list-card:active { transform: scale(0.98); }
+  .list-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .list-card-title { font-family: var(--serif); font-size: 22px; font-weight: 500; color: var(--green-dark); }
+  .list-card-badge {
+    background: var(--green);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 10px;
+  }
+  .list-card-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .list-card-meta span { display: flex; align-items: center; gap: 4px; }
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 2px;
+  }
+
+  .new-list-btn {
+    margin: 16px 24px;
+    padding: 16px;
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    text-align: center;
+    color: var(--text-muted);
+    background: transparent;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    width: calc(100% - 48px);
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .new-list-btn:active { border-color: var(--green); color: var(--green); }
+
+  /* ---------- List Detail ---------- */
+  .list-detail-header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: var(--green);
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 8px;
+    font-family: inherit;
+  }
+  .list-title-section { padding: 8px 24px 16px; }
+  .list-title { font-family: var(--serif); font-size: 32px; font-weight: 500; color: var(--green-dark); }
+  .list-meta { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+  .add-item-bar {
+    margin: 0 16px 12px;
+    display: flex;
+    gap: 8px;
+  }
+  .add-item-input {
+    flex: 1;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    color: var(--text);
+  }
+  .add-item-input:focus { border-color: var(--green); }
+  .add-item-btn {
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 0 20px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .add-item-btn:active { background: var(--green-dark); }
+
+  .quick-actions {
+    display: flex;
+    gap: 8px;
+    padding: 0 16px 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .quick-actions::-webkit-scrollbar { display: none; }
+  .quick-action {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--green-dark);
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+  }
+  .quick-action:active { background: #f5f1e8; }
+  .quick-action svg { width: 14px; height: 14px; }
+
+  .list-progress {
+    margin: 0 24px 16px;
+  }
+  .list-progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .list-progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .list-progress-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  .category-section { margin-bottom: 16px; }
+  .category-header {
+    padding: 8px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .category-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .category-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  .category-count { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+
+  .item {
+    background: white;
+    margin: 0 16px 8px;
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .item:active { background: #f9f6ee; }
+  .item.checked { opacity: 0.5; }
+  .item.checked .item-name { text-decoration: line-through; }
+
+  .item-checkbox {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #d4cfc1;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .item.checked .item-checkbox {
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .item.checked .item-checkbox::after {
+    content: "";
+    width: 8px;
+    height: 4px;
+    border-left: 2px solid white;
+    border-bottom: 2px solid white;
+    transform: rotate(-45deg) translate(1px, -1px);
+  }
+  .item-content { flex: 1; min-width: 0; }
+  .item-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .item-name { font-size: 16px; font-weight: 600; color: var(--text); }
+  .item-qty { font-size: 13px; color: var(--text-muted); }
+  .item-source { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .item-menu {
+    color: #c4bfb1;
+    font-size: 18px;
+    padding: 4px 8px;
+    cursor: pointer;
+  }
+
+  /* ---------- Modal ---------- */
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 100;
+    display: none;
+    align-items: flex-end;
+    transition: opacity 0.3s;
+    opacity: 0;
+  }
+  .modal-backdrop.active { display: flex; opacity: 1; }
+  .modal {
+    width: 100%;
+    background: var(--cream);
+    border-radius: 24px 24px 0 0;
+    max-height: 85%;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    padding-bottom: 32px;
+  }
+  .modal-backdrop.active .modal { transform: translateY(0); }
+  .modal-handle {
+    width: 36px;
+    height: 4px;
+    background: #d4cfc1;
+    border-radius: 2px;
+    margin: 12px auto 8px;
+  }
+  .modal-header {
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-title { font-family: var(--serif); font-size: 22px; font-weight: 500; color: var(--green-dark); }
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-body { padding: 20px 24px; }
+
+  /* ---------- Share / QR ---------- */
+  .share-screen { padding: 24px; text-align: center; }
+  .qr-container {
+    background: white;
+    border-radius: 24px;
+    padding: 28px;
+    margin: 24px auto;
+    width: fit-content;
+    border: 1px solid var(--border);
+  }
+  .qr-code {
+    width: 220px;
+    height: 220px;
+    background-image:
+      linear-gradient(45deg, #1a1a1a 25%, transparent 25%),
+      linear-gradient(-45deg, #1a1a1a 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #1a1a1a 75%),
+      linear-gradient(-45deg, transparent 75%, #1a1a1a 75%);
+    background-size: 12px 12px;
+    background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .qr-corners::before, .qr-corners::after,
+  .qr-bottom::before {
+    content: "";
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border: 8px solid white;
+    background: white;
+  }
+  .qr-corners::before { top: 0; left: 0; }
+  .qr-corners::after { top: 0; right: 0; }
+  .qr-bottom::before { bottom: 0; left: 0; }
+  .qr-corner-inner {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: #1a1a1a;
+    border: 4px solid white;
+    border-radius: 4px;
+  }
+  .qr-corner-tl { top: 8px; left: 8px; }
+  .qr-corner-tr { top: 8px; right: 8px; }
+  .qr-corner-bl { bottom: 8px; left: 8px; }
+
+  .share-link {
+    background: white;
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+  }
+  .share-link-text {
+    font-size: 13px;
+    color: var(--text);
+    font-family: 'SF Mono', Menlo, monospace;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    flex: 1;
+    text-align: left;
+  }
+  .copy-btn {
+    background: var(--green-light);
+    color: var(--green-dark);
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 12px;
+    font-family: inherit;
+  }
+  .permission-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .permission-option {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    text-align: left;
+  }
+  .permission-option.selected {
+    border-color: var(--green);
+    background: var(--green-light);
+  }
+  .permission-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--green-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .permission-option.selected .permission-icon { background: var(--green); color: white; }
+  .permission-text { flex: 1; }
+  .permission-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .permission-desc { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ---------- Empty / loading states ---------- */
+  .empty-state {
+    padding: 40px 24px;
+    text-align: center;
+  }
+  .empty-state-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 16px;
+    background: rgba(58, 90, 64, 0.08);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .empty-state-title { font-family: var(--serif); font-size: 22px; font-weight: 500; color: var(--green-dark); margin-bottom: 8px; }
+  .empty-state-text { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+
+  /* ---------- Image import preview ---------- */
+  .image-preview {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+  }
+  .image-thumb {
+    width: 100%;
+    height: 140px;
+    background: linear-gradient(135deg, #f0ece0 0%, #e8e3d8 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+  .extracted-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .extracted-item {
+    background: var(--cream);
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .extracted-checkbox {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--green);
+    border-radius: 6px;
+    background: var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .extracted-checkbox::after {
+    content: "";
+    width: 6px;
+    height: 3px;
+    border-left: 2px solid white;
+    border-bottom: 2px solid white;
+    transform: rotate(-45deg);
+  }
+  .extracted-item-name { font-size: 14px; font-weight: 500; flex: 1; }
+  .extracted-cat-pill {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--green-light);
+    color: var(--green-dark);
+  }
+
+  /* ---------- Recipe import ---------- */
+  .recipe-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .recipe-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .recipe-favicon {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background: var(--green-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--green-dark);
+  }
+  .recipe-source { font-size: 12px; color: var(--text-muted); }
+  .recipe-title { font-family: var(--serif); font-size: 22px; font-weight: 500; color: var(--green-dark); margin-bottom: 4px; }
+  .recipe-info { font-size: 13px; color: var(--text-muted); }
+
+  /* ---------- Settings list ---------- */
+  .settings-section { margin-bottom: 24px; }
+  .settings-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0 24px 8px;
+  }
+  .settings-row {
+    background: white;
+    margin: 0 16px 1px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+  }
+  .settings-row:first-of-type { border-radius: 14px 14px 0 0; }
+  .settings-row:last-of-type { border-radius: 0 0 14px 14px; border-bottom: none; }
+  .settings-row.solo { border-radius: 14px; border-bottom: none; }
+  .settings-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--green-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--green-dark);
+    flex-shrink: 0;
+  }
+  .settings-icon svg { width: 16px; height: 16px; }
+  .settings-label { flex: 1; font-size: 15px; color: var(--text); font-weight: 500; }
+  .settings-value { font-size: 14px; color: var(--text-muted); }
+  .chevron { color: #c4bfb1; }
+
+  /* ---------- Toast ---------- */
+  .toast {
+    position: absolute;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--green-dark);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 200;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- Guest banner ---------- */
+  .guest-banner {
+    background: var(--green-light);
+    color: var(--green-dark);
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  /* ---------- Animations ---------- */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .item { animation: fadeIn 0.3s ease both; }
+
+  /* hide scrollbars but keep scroll */
+  .screen-content::-webkit-scrollbar { width: 0; }
+
+  /* Lang switcher footer note */
+  .lang-toggle-mini {
+    position: absolute;
+    bottom: 90px;
+    right: 16px;
+    z-index: 50;
+    background: rgba(255,255,255,0.9);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green-dark);
+    cursor: pointer;
+    display: none;
+  }
+  .lang-toggle-mini.show { display: flex; align-items: center; gap: 4px; }
+
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <!-- iOS-style status bar -->
+  <div class="status-bar">
+    <span id="time">9:41</span>
+    <div class="status-icons">
+      <svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="6" width="3" height="6" rx="1"/><rect x="5" y="3" width="3" height="9" rx="1"/><rect x="10" y="0" width="3" height="12" rx="1"/></svg>
+      <svg viewBox="0 0 16 12" fill="currentColor"><path d="M8 11.5c1 0 1.8-.8 1.8-1.8S9 7.9 8 7.9s-1.8.8-1.8 1.8S7 11.5 8 11.5zm5.4-5.4l1.4-1.4c-3.7-3.7-9.7-3.7-13.5 0l1.4 1.4C5.6 3.2 10.4 3.2 13.4 6.1z"/></svg>
+      <svg viewBox="0 0 25 12" fill="none" stroke="currentColor"><rect x="0.5" y="0.5" width="21" height="11" rx="3"/><rect x="2" y="2" width="18" height="8" rx="1.5" fill="currentColor"/><rect x="22" y="3.5" width="2" height="5" rx="1" fill="currentColor"/></svg>
+    </div>
+  </div>
+
+  <!-- ============ ONBOARDING ============ -->
+  <div class="screen active" id="screen-onboarding">
+    <div class="onboarding">
+      <div class="onboarding-slides" id="onboardingSlides">
+        <!-- Slide 1 -->
+        <div class="onboarding-slide">
+          <div class="onboarding-illustration">
+            <svg viewBox="0 0 130 130" fill="none">
+              <circle cx="65" cy="65" r="55" stroke="#3a5a40" stroke-width="2" stroke-dasharray="4 4" opacity="0.3"/>
+              <path d="M30 50 L100 50 L92 100 L38 100 Z" fill="#3a5a40"/>
+              <circle cx="48" cy="115" r="6" fill="#2d4733"/>
+              <circle cx="82" cy="115" r="6" fill="#2d4733"/>
+              <path d="M30 50 L25 35 L18 35" stroke="#3a5a40" stroke-width="3" stroke-linecap="round"/>
+              <path d="M52 65 L60 73 L78 55" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h1 class="onboarding-title">Hej! Välkommen till Lista</h1>
+          <p class="onboarding-text">Den smarta inköpslistan som hela hushållet delar — i realtid.</p>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="onboarding-slide">
+          <div class="onboarding-illustration">
+            <svg viewBox="0 0 130 130" fill="none">
+              <rect x="20" y="35" width="55" height="70" rx="8" fill="#3a5a40" opacity="0.85"/>
+              <rect x="55" y="25" width="55" height="70" rx="8" fill="#3a5a40"/>
+              <line x1="65" y1="42" x2="100" y2="42" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              <line x1="65" y1="55" x2="95" y2="55" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              <line x1="65" y1="68" x2="100" y2="68" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              <line x1="65" y1="81" x2="90" y2="81" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="62" cy="42" r="2" fill="white"/>
+              <circle cx="62" cy="55" r="2" fill="white"/>
+              <circle cx="62" cy="68" r="2" fill="white"/>
+              <circle cx="62" cy="81" r="2" fill="white"/>
+            </svg>
+          </div>
+          <h1 class="onboarding-title">Allt synkas direkt</h1>
+          <p class="onboarding-text">När någon i hushållet bockar av mjölken försvinner den från din lista — i samma sekund.</p>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="onboarding-slide">
+          <div class="onboarding-illustration">
+            <svg viewBox="0 0 130 130" fill="none">
+              <rect x="20" y="25" width="90" height="80" rx="10" fill="white" stroke="#3a5a40" stroke-width="2"/>
+              <path d="M40 50 L55 50 M40 65 L70 65 M40 80 L60 80" stroke="#3a5a40" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+              <circle cx="95" cy="35" r="14" fill="#3a5a40"/>
+              <path d="M88 35 L93 40 L102 30" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M75 95 Q85 75 100 90" stroke="#3a5a40" stroke-width="2" stroke-dasharray="3 3"/>
+              <text x="78" y="115" font-size="11" fill="#3a5a40" font-weight="700">AI</text>
+            </svg>
+          </div>
+          <h1 class="onboarding-title">Snappa varor med kameran</h1>
+          <p class="onboarding-text">Fota en handskriven lapp eller klistra in en recept-länk. AI:n läser av allt och sorterar i kategorier.</p>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="onboarding-slide">
+          <div class="onboarding-illustration">
+            <svg viewBox="0 0 130 130" fill="none">
+              <rect x="35" y="35" width="60" height="60" rx="8" fill="#3a5a40"/>
+              <rect x="42" y="42" width="46" height="46" fill="white"/>
+              <rect x="46" y="46" width="8" height="8" fill="#3a5a40"/>
+              <rect x="58" y="46" width="4" height="4" fill="#3a5a40"/>
+              <rect x="66" y="46" width="4" height="4" fill="#3a5a40"/>
+              <rect x="76" y="46" width="8" height="8" fill="#3a5a40"/>
+              <rect x="46" y="58" width="4" height="4" fill="#3a5a40"/>
+              <rect x="54" y="62" width="6" height="6" fill="#3a5a40"/>
+              <rect x="64" y="58" width="4" height="4" fill="#3a5a40"/>
+              <rect x="72" y="64" width="4" height="4" fill="#3a5a40"/>
+              <rect x="46" y="76" width="8" height="8" fill="#3a5a40"/>
+              <rect x="58" y="76" width="4" height="4" fill="#3a5a40"/>
+              <rect x="66" y="80" width="6" height="6" fill="#3a5a40"/>
+              <rect x="76" y="76" width="8" height="8" fill="#3a5a40"/>
+            </svg>
+          </div>
+          <h1 class="onboarding-title">Dela med en QR-kod</h1>
+          <p class="onboarding-text">Bjud in familj eller vänner med en länk eller QR-kod. Inget konto krävs för att gästanvändare ska kunna handla.</p>
+        </div>
+      </div>
+
+      <div class="onboarding-footer">
+        <div class="onboarding-dots" id="onboardingDots">
+          <div class="onboarding-dot active"></div>
+          <div class="onboarding-dot"></div>
+          <div class="onboarding-dot"></div>
+          <div class="onboarding-dot"></div>
+        </div>
+        <button class="btn btn-primary" id="onboardingNext" onclick="onboardingNext()">Fortsätt</button>
+        <button class="btn-text" onclick="goTo('screen-auth')">Hoppa över</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ AUTH ============ -->
+  <div class="screen" id="screen-auth">
+    <div class="screen-content auth-screen">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2C8 6 6 10 6 14a6 6 0 0012 0c0-4-2-8-6-12z" fill="white"/>
+            <path d="M12 2C8 6 6 10 6 14a6 6 0 0012 0" stroke="white" stroke-width="0.5"/>
+            <path d="M12 4v18" stroke="#3a5a40" stroke-width="0.6" opacity="0.5"/>
+          </svg>
+        </div>
+        <div>
+          <div class="auth-logo-text">Lista</div>
+          <div style="font-size: 13px; color: var(--text-muted);">Smart inköpslista</div>
+        </div>
+      </div>
+
+      <h1 class="serif" style="font-size: 28px; color: var(--green-dark); margin-bottom: 8px;">Välkommen tillbaka</h1>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 32px;">Logga in för att fortsätta handla smart.</p>
+
+      <div class="form-group">
+        <label class="form-label">E-post</label>
+        <input type="email" class="form-input" placeholder="namn@example.com" value="erik.friberg123@gmail.com" />
+      </div>
+
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label class="form-label">Lösenord</label>
+        <input type="password" class="form-input" placeholder="••••••••" value="password" />
+      </div>
+
+      <button class="btn btn-primary" onclick="goTo('screen-lists')">Logga in</button>
+
+      <div style="text-align: center; margin-top: 24px;">
+        <span style="font-size: 14px; color: var(--text-muted);">Ny användare? </span>
+        <button class="btn-text" style="padding: 0; color: var(--green); font-weight: 600;" onclick="goTo('screen-lists')">Skapa konto</button>
+      </div>
+
+      <div style="margin-top: auto; padding-top: 24px; text-align: center;">
+        <button class="btn-text" onclick="goTo('screen-guest-list')">Eller fortsätt som gäst →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ LISTS OVERVIEW ============ -->
+  <div class="screen" id="screen-lists">
+    <div class="screen-content">
+      <div class="header">
+        <div class="header-left">
+          <div class="header-logo">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2C8 6 6 10 6 14a6 6 0 0012 0c0-4-2-8-6-12z" fill="white"/>
+            </svg>
+          </div>
+          <div class="header-title">Lista</div>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" onclick="goTo('screen-settings')" aria-label="Inställningar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="page-title-section">
+        <h1 class="page-title">Mina listor</h1>
+        <p class="page-subtitle">3 aktiva · 1 hushåll</p>
+      </div>
+
+      <div class="list-card" onclick="goTo('screen-list-detail')">
+        <div class="list-card-header">
+          <div class="list-card-title">Inköpslista</div>
+          <div class="list-card-badge">11 kvar</div>
+        </div>
+        <div class="list-card-meta">
+          <span>📍 Veckohandling</span>
+          <span>· 3 av 14</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 21%;"></div>
+        </div>
+      </div>
+
+      <div class="list-card" onclick="goTo('screen-list-detail')">
+        <div class="list-card-header">
+          <div class="list-card-title">Tacos på fredag</div>
+          <div class="list-card-badge">5 kvar</div>
+        </div>
+        <div class="list-card-meta">
+          <span>🌮 Recept</span>
+          <span>· 0 av 5</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div class="list-card" onclick="goTo('screen-list-detail')">
+        <div class="list-card-header">
+          <div class="list-card-title">Apoteket</div>
+          <div class="list-card-badge">2 kvar</div>
+        </div>
+        <div class="list-card-meta">
+          <span>💊 Snabblista</span>
+          <span>· 0 av 2</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <button class="new-list-btn" onclick="showToast('Ny lista skapad')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Ny lista
+      </button>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item active" onclick="goTo('screen-lists')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        <span>LISTA</span>
+      </div>
+      <div class="tab-item" onclick="showToast('Recept kommer snart')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        <span>RECEPT</span>
+      </div>
+      <div class="tab-item" onclick="showToast('Planera kommer snart')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>PLANERA</span>
+      </div>
+      <div class="tab-item" onclick="goTo('screen-settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        <span>HUSHÅLL</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ LIST DETAIL ============ -->
+  <div class="screen" id="screen-list-detail">
+    <div class="list-detail-header">
+      <button class="back-btn" onclick="goTo('screen-lists')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Listor
+      </button>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="openShareModal()" aria-label="Dela">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="screen-content">
+      <div class="list-title-section">
+        <h1 class="list-title">Inköpslista</h1>
+        <p class="list-meta">Veckohandling · <span id="itemsLeft">11</span> kvar</p>
+      </div>
+
+      <div class="add-item-bar">
+        <input class="add-item-input" placeholder="+ Lägg till vara…" id="newItemInput" onkeydown="if(event.key==='Enter') addNewItem()" />
+        <button class="add-item-btn" onclick="addNewItem()">Lägg till</button>
+      </div>
+
+      <div class="quick-actions">
+        <button class="quick-action" onclick="openImportModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Importera bild
+        </button>
+        <button class="quick-action" onclick="openRecipeModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          Klistra in recept
+        </button>
+        <button class="quick-action" onclick="showToast('Sorterad efter butik')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h12"/></svg>
+          Sortera butik
+        </button>
+        <button class="quick-action" onclick="clearChecked()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 01-2 2H9a2 2 0 01-2-2L5 6"/></svg>
+          Rensa köpta
+        </button>
+      </div>
+
+      <div class="list-progress">
+        <div class="list-progress-text">
+          <span><span id="checkedCount">3</span> av <span id="totalCount">14</span> varor klara</span>
+          <span id="progressPct">21%</span>
+        </div>
+        <div class="list-progress-bar">
+          <div class="list-progress-fill" id="progressFill" style="width: 21%;"></div>
+        </div>
+      </div>
+
+      <!-- Categories with items -->
+      <div id="itemsContainer">
+        <div class="category-section" data-cat="produce">
+          <div class="category-header">
+            <div class="category-name">
+              <div class="category-dot" style="background: var(--cat-produce);"></div>
+              FRUKT &amp; GRÖNT
+            </div>
+            <div class="category-count">3/3</div>
+          </div>
+          <div class="item" onclick="toggleItem(this)">
+            <div class="item-checkbox"></div>
+            <div class="item-content">
+              <div class="item-row"><span class="item-name">Bananer</span><span class="item-qty">6 st</span></div>
+              <div class="item-source">Manuellt</div>
+            </div>
+            <div class="item-menu">⋮</div>
+          </div>
+          <div class="item" onclick="toggleItem(this)">
+            <div class="item-checkbox"></div>
+            <div class="item-content">
+              <div class="item-row"><span class="item-name">Tomater</span><span class="item-qty">500 g</span></div>
+              <div class="item-source">Från: Tacos</div>
+            </div>
+            <div class="item-menu">⋮</div>
+          </div>
+          <div class="item" onclick="toggleItem(this)">
+            <div class="item-checkbox"></div>
+            <div class="item-content">
+              <div class="item-row"><span class="item-name">Sallad</span><span class="item-qty">1 huvud</span></div>
+              <div class="item-source">Från: Tacos</div>
+            </div>
+            <div class="item-menu">⋮</div>
+          </div>
+        </div>
+
+        <div class="category-section" data-cat="dairy">
+          <div class="category-header">
+            <div class="category-name">
+              <div class="category-dot" style="background: var(--cat-dairy);"></div>
+              MEJERI
+            </div>
+            <div class="category-count">2/2</div>
+          </div>
+          <div class="item" onclick="toggleItem(this)">
+            <div class="item-checkbox"></div>
+            <div class="item-content">
+              <div class="item-row"><span class="item-name">Mjölk</span><span class="item-qty">1 liter</span></div>
+              <div class="item-source">Manuellt</div>
+            </div>
+            <div class="item-menu">⋮</div>
+          </div>
+          <div class="item" onclick="toggleItem(this)">
+            <div class="item-checkbox"></div>
+            <div class="item-content">
+              <div class="item-row"><span class="item-name">Crème fraîche</span><span class="item-qty">2 dl</span></div>
+              <div class="item-source">Från: Tacos</div>
+            </div>
+            <div class="item-menu">⋮</div>
+          </div>
+        </div>
+
+        <div class="category-section" data-cat="pantry">
+          <div class="category-header">
+            <div class="category-name">
+              <div class="category-dot" style="background: var(--cat-pantry);"></div>
+              SKAFFERI
+            </div>
+            <div class="category-count">3/3</div>
+          </div>
+          <div class="item" onclick="toggleItem(this)">
+            <div class="item-checkbox"></div>
+            <div class="item-content">
+              <div class="item-row"><span class="item-name">Tortillabröd</span><span class="item-qty">1 paket</span></div>
+              <div class="item-source">Från: Tacos</div>
+            </div>
+            <div class="item-menu">⋮</div>
+          </div>
+          <div class="item" onclick="toggleItem(this)">
+            <div class="item-checkbox"></div>
+            <div class="item-content">
+              <div class="item-row"><span class="item-name">Tacokrydda</span><span class="item-qty">1 påse</span></div>
+              <div class="item-source">Från: Tacos</div>
+            </div>
+            <div class="item-menu">⋮</div>
+          </div>
+          <div class="item checked" onclick="toggleItem(this)">
+            <div class="item-checkbox"></div>
+            <div class="item-content">
+              <div class="item-row"><span class="item-name">Olivolja</span><span class="item-qty">500 ml</span></div>
+              <div class="item-source">Manuellt</div>
+            </div>
+            <div class="item-menu">⋮</div>
+          </div>
+        </div>
+
+        <div class="category-section" data-cat="meat">
+          <div class="category-header">
+            <div class="category-name">
+              <div class="category-dot" style="background: var(--cat-meat);"></div>
+              KÖTT &amp; FISK
+            </div>
+            <div class="category-count">1/1</div>
+          </div>
+          <div class="item" onclick="toggleItem(this)">
+            <div class="item-checkbox"></div>
+            <div class="item-content">
+              <div class="item-row"><span class="item-name">Köttfärs</span><span class="item-qty">500 g</span></div>
+              <div class="item-source">Från: Tacos</div>
+            </div>
+            <div class="item-menu">⋮</div>
+          </div>
+        </div>
+
+        <div class="category-section" data-cat="bakery">
+          <div class="category-header">
+            <div class="category-name">
+              <div class="category-dot" style="background: var(--cat-bakery);"></div>
+              BAGERI
+            </div>
+            <div class="category-count">2/3</div>
+          </div>
+          <div class="item checked" onclick="toggleItem(this)">
+            <div class="item-checkbox"></div>
+            <div class="item-content">
+              <div class="item-row"><span class="item-name">Surdegsbröd</span></div>
+              <div class="item-source">Manuellt</div>
+            </div>
+            <div class="item-menu">⋮</div>
+          </div>
+          <div class="item" onclick="toggleItem(this)">
+            <div class="item-checkbox"></div>
+            <div class="item-content">
+              <div class="item-row"><span class="item-name">Frallor</span><span class="item-qty">6 st</span></div>
+              <div class="item-source">Manuellt</div>
+            </div>
+            <div class="item-menu">⋮</div>
+          </div>
+          <div class="item checked" onclick="toggleItem(this)">
+            <div class="item-checkbox"></div>
+            <div class="item-content">
+              <div class="item-row"><span class="item-name">Kanelbullar</span><span class="item-qty">4 st</span></div>
+              <div class="item-source">Manuellt</div>
+            </div>
+            <div class="item-menu">⋮</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height: 24px;"></div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab-item active" onclick="goTo('screen-lists')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        <span>LISTA</span>
+      </div>
+      <div class="tab-item" onclick="showToast('Recept kommer snart')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        <span>RECEPT</span>
+      </div>
+      <div class="tab-item" onclick="showToast('Planera kommer snart')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>PLANERA</span>
+      </div>
+      <div class="tab-item" onclick="goTo('screen-settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        <span>HUSHÅLL</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SETTINGS ============ -->
+  <div class="screen" id="screen-settings">
+    <div class="list-detail-header">
+      <button class="back-btn" onclick="goTo('screen-lists')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Tillbaka
+      </button>
+      <div></div>
+    </div>
+    <div class="screen-content">
+      <div class="page-title-section">
+        <h1 class="page-title">Inställningar</h1>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Konto</div>
+        <div class="settings-row">
+          <div class="settings-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="settings-label">Erik Friberg</div>
+          <span class="settings-value">erik.friberg123@gmail.com</span>
+        </div>
+        <div class="settings-row">
+          <div class="settings-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21v-2a4 4 0 014-4h10a4 4 0 014 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="settings-label">Hushåll</div>
+          <span class="settings-value">Familjen Friberg</span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Preferenser</div>
+        <div class="settings-row" onclick="toggleLanguage()">
+          <div class="settings-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+          </div>
+          <div class="settings-label" id="langLabel">Språk</div>
+          <span class="settings-value" id="langValue">Svenska</span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="settings-row">
+          <div class="settings-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+          </div>
+          <div class="settings-label">Butikssortering</div>
+          <span class="settings-value">ICA Maxi</span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="settings-row">
+          <div class="settings-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <div class="settings-label">AI-funktioner</div>
+          <span class="settings-value">Påslagna</span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Övrigt</div>
+        <div class="settings-row solo" onclick="goTo('screen-onboarding'); resetOnboarding();">
+          <div class="settings-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+          </div>
+          <div class="settings-label">Visa rundtur igen</div>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+
+      <div style="padding: 24px;">
+        <button class="btn btn-secondary" style="width: 100%;" onclick="goTo('screen-auth')">Logga ut</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ GUEST LIST ============ -->
+  <div class="screen" id="screen-guest-list">
+    <div class="guest-banner">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+      Du tittar som gäst — alla ändringar synkas direkt
+    </div>
+    <div class="list-detail-header">
+      <button class="back-btn" onclick="goTo('screen-auth')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Avsluta
+      </button>
+    </div>
+
+    <div class="screen-content">
+      <div class="list-title-section">
+        <h1 class="list-title">Inköpslista</h1>
+        <p class="list-meta">Delad av Erik · 11 kvar</p>
+      </div>
+
+      <div class="add-item-bar">
+        <input class="add-item-input" placeholder="+ Lägg till vara…" />
+        <button class="add-item-btn">Lägg till</button>
+      </div>
+
+      <div class="list-progress">
+        <div class="list-progress-text">
+          <span>3 av 14 varor klara</span>
+          <span>21%</span>
+        </div>
+        <div class="list-progress-bar">
+          <div class="list-progress-fill" style="width: 21%;"></div>
+        </div>
+      </div>
+
+      <div class="category-section">
+        <div class="category-header">
+          <div class="category-name">
+            <div class="category-dot" style="background: var(--cat-produce);"></div>
+            FRUKT &amp; GRÖNT
+          </div>
+          <div class="category-count">3/3</div>
+        </div>
+        <div class="item" onclick="toggleItem(this)">
+          <div class="item-checkbox"></div>
+          <div class="item-content">
+            <div class="item-row"><span class="item-name">Bananer</span><span class="item-qty">6 st</span></div>
+          </div>
+        </div>
+        <div class="item" onclick="toggleItem(this)">
+          <div class="item-checkbox"></div>
+          <div class="item-content">
+            <div class="item-row"><span class="item-name">Tomater</span><span class="item-qty">500 g</span></div>
+          </div>
+        </div>
+        <div class="item" onclick="toggleItem(this)">
+          <div class="item-checkbox"></div>
+          <div class="item-content">
+            <div class="item-row"><span class="item-name">Sallad</span><span class="item-qty">1 huvud</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="category-section">
+        <div class="category-header">
+          <div class="category-name">
+            <div class="category-dot" style="background: var(--cat-dairy);"></div>
+            MEJERI
+          </div>
+          <div class="category-count">2/2</div>
+        </div>
+        <div class="item" onclick="toggleItem(this)">
+          <div class="item-checkbox"></div>
+          <div class="item-content">
+            <div class="item-row"><span class="item-name">Mjölk</span><span class="item-qty">1 liter</span></div>
+          </div>
+        </div>
+        <div class="item" onclick="toggleItem(this)">
+          <div class="item-checkbox"></div>
+          <div class="item-content">
+            <div class="item-row"><span class="item-name">Crème fraîche</span><span class="item-qty">2 dl</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: 16px 24px;">
+        <button class="btn btn-secondary" onclick="goTo('screen-auth')" style="width: 100%;">Skapa konto för fler funktioner</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: SHARE / QR ============ -->
+  <div class="modal-backdrop" id="shareModal" onclick="if(event.target===this) closeModal('shareModal')">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title">Dela lista</div>
+        <button class="modal-close" onclick="closeModal('shareModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center;">
+          <div class="qr-container">
+            <div class="qr-code">
+              <div class="qr-corners"></div>
+              <div class="qr-bottom"></div>
+              <div class="qr-corner-inner qr-corner-tl"></div>
+              <div class="qr-corner-inner qr-corner-tr"></div>
+              <div class="qr-corner-inner qr-corner-bl"></div>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Skanna QR-koden för att öppna listan</p>
+        </div>
+
+        <div class="share-link">
+          <span class="share-link-text">lista.app/s/aB3xK9pQ2</span>
+          <button class="copy-btn" onclick="showToast('Länken är kopierad')">Kopiera</button>
+        </div>
+
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 12px;">Behörighet</div>
+        <div class="permission-options">
+          <div class="permission-option" onclick="selectPermission(this)">
+            <div class="permission-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div class="permission-text">
+              <div class="permission-title">Endast visa</div>
+              <div class="permission-desc">Gästen kan bara se listan</div>
+            </div>
+          </div>
+          <div class="permission-option selected" onclick="selectPermission(this)">
+            <div class="permission-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+            <div class="permission-text">
+              <div class="permission-title">Lägg till varor</div>
+              <div class="permission-desc">Kan lägga till och bocka av</div>
+            </div>
+          </div>
+          <div class="permission-option" onclick="selectPermission(this)">
+            <div class="permission-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </div>
+            <div class="permission-text">
+              <div class="permission-title">Full redigering</div>
+              <div class="permission-desc">Kan göra alla ändringar</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="closeModal('shareModal'); showToast('Länk skapad');">Klar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: IMAGE IMPORT ============ -->
+  <div class="modal-backdrop" id="importModal" onclick="if(event.target===this) closeModal('importModal')">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title">Importera från bild</div>
+        <button class="modal-close" onclick="closeModal('importModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="image-preview">
+          <div class="image-thumb">
+            <div style="text-align: center;">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <div style="margin-top: 8px;">Handskriven lapp</div>
+            </div>
+          </div>
+          <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">AI hittade <strong style="color: var(--green-dark);">5 varor</strong>. Kontrollera innan du lägger till:</div>
+          <div class="extracted-items">
+            <div class="extracted-item">
+              <div class="extracted-checkbox"></div>
+              <div class="extracted-item-name">Äpplen <span style="color: var(--text-muted); font-weight: 400; font-size: 12px;">1 kg</span></div>
+              <div class="extracted-cat-pill">Frukt</div>
+            </div>
+            <div class="extracted-item">
+              <div class="extracted-checkbox"></div>
+              <div class="extracted-item-name">Smör <span style="color: var(--text-muted); font-weight: 400; font-size: 12px;">250 g</span></div>
+              <div class="extracted-cat-pill">Mejeri</div>
+            </div>
+            <div class="extracted-item">
+              <div class="extracted-checkbox"></div>
+              <div class="extracted-item-name">Ägg <span style="color: var(--text-muted); font-weight: 400; font-size: 12px;">12 st</span></div>
+              <div class="extracted-cat-pill">Mejeri</div>
+            </div>
+            <div class="extracted-item">
+              <div class="extracted-checkbox"></div>
+              <div class="extracted-item-name">Pasta <span style="color: var(--text-muted); font-weight: 400; font-size: 12px;">500 g</span></div>
+              <div class="extracted-cat-pill">Skafferi</div>
+            </div>
+            <div class="extracted-item">
+              <div class="extracted-checkbox"></div>
+              <div class="extracted-item-name">Kaffe <span style="color: var(--text-muted); font-weight: 400; font-size: 12px;">250 g</span></div>
+              <div class="extracted-cat-pill">Skafferi</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="closeModal('importModal'); showToast('5 varor lagda till');">Lägg till 5 varor</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: RECIPE IMPORT ============ -->
+  <div class="modal-backdrop" id="recipeModal" onclick="if(event.target===this) closeModal('recipeModal')">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title">Importera recept</div>
+        <button class="modal-close" onclick="closeModal('recipeModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Recept-länk</label>
+          <input class="form-input" value="https://ica.se/recept/krämig-pasta-broccoli" />
+        </div>
+
+        <div class="recipe-card">
+          <div class="recipe-meta">
+            <div class="recipe-favicon">IC</div>
+            <span class="recipe-source">ica.se</span>
+          </div>
+          <div class="recipe-title">Krämig pasta med broccoli</div>
+          <div class="recipe-info">4 portioner · 30 min</div>
+        </div>
+
+        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">AI hittade <strong style="color: var(--green-dark);">7 ingredienser</strong>:</div>
+
+        <div class="extracted-items" style="margin-bottom: 24px;">
+          <div class="extracted-item">
+            <div class="extracted-checkbox"></div>
+            <div class="extracted-item-name">Pasta <span style="color: var(--text-muted); font-weight: 400; font-size: 12px;">400 g</span></div>
+            <div class="extracted-cat-pill">Skafferi</div>
+          </div>
+          <div class="extracted-item">
+            <div class="extracted-checkbox"></div>
+            <div class="extracted-item-name">Broccoli <span style="color: var(--text-muted); font-weight: 400; font-size: 12px;">1 huvud</span></div>
+            <div class="extracted-cat-pill">Grönt</div>
+          </div>
+          <div class="extracted-item">
+            <div class="extracted-checkbox"></div>
+            <div class="extracted-item-name">Grädde <span style="color: var(--text-muted); font-weight: 400; font-size: 12px;">3 dl</span></div>
+            <div class="extracted-cat-pill">Mejeri</div>
+          </div>
+          <div class="extracted-item">
+            <div class="extracted-checkbox"></div>
+            <div class="extracted-item-name">Parmesan <span style="color: var(--text-muted); font-weight: 400; font-size: 12px;">100 g</span></div>
+            <div class="extracted-cat-pill">Mejeri</div>
+          </div>
+          <div class="extracted-item">
+            <div class="extracted-checkbox"></div>
+            <div class="extracted-item-name">Vitlök <span style="color: var(--text-muted); font-weight: 400; font-size: 12px;">3 klyftor</span></div>
+            <div class="extracted-cat-pill">Grönt</div>
+          </div>
+          <div class="extracted-item">
+            <div class="extracted-checkbox"></div>
+            <div class="extracted-item-name">Citron <span style="color: var(--text-muted); font-weight: 400; font-size: 12px;">1 st</span></div>
+            <div class="extracted-cat-pill">Frukt</div>
+          </div>
+          <div class="extracted-item">
+            <div class="extracted-checkbox"></div>
+            <div class="extracted-item-name">Olivolja</div>
+            <div class="extracted-cat-pill">Skafferi</div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="closeModal('recipeModal'); showToast('7 ingredienser lagda till');">Lägg till 7 varor</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+</div>
+
+<script>
+  // ----- Time -----
+  function updateTime() {
+    const now = new Date();
+    const h = now.getHours();
+    const m = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('time').textContent = `${h}:${m}`;
+  }
+  updateTime();
+  setInterval(updateTime, 60000);
+
+  // ----- Navigation -----
+  let currentScreen = 'screen-onboarding';
+  function goTo(screenId) {
+    const current = document.getElementById(currentScreen);
+    const next = document.getElementById(screenId);
+    if (!next) return;
+
+    if (current) {
+      current.classList.add('exiting-left');
+      current.classList.remove('active');
+      setTimeout(() => current.classList.remove('exiting-left'), 350);
+    }
+    next.style.transform = 'translateX(100%)';
+    next.style.opacity = '0';
+    requestAnimationFrame(() => {
+      next.classList.add('active');
+      next.style.transform = '';
+      next.style.opacity = '';
+    });
+    currentScreen = screenId;
+
+    // Reset scroll
+    const content = next.querySelector('.screen-content');
+    if (content) content.scrollTop = 0;
+  }
+
+  // ----- Onboarding -----
+  let onboardingIndex = 0;
+  const slides = document.getElementById('onboardingSlides');
+  const dots = document.querySelectorAll('#onboardingDots .onboarding-dot');
+  const onboardingNextBtn = document.getElementById('onboardingNext');
+
+  function updateOnboardingDots() {
+    dots.forEach((d, i) => d.classList.toggle('active', i === onboardingIndex));
+    onboardingNextBtn.textContent = onboardingIndex === 3 ? 'Kom igång' : 'Fortsätt';
+  }
+
+  slides.addEventListener('scroll', () => {
+    const idx = Math.round(slides.scrollLeft / slides.offsetWidth);
+    if (idx !== onboardingIndex) {
+      onboardingIndex = idx;
+      updateOnboardingDots();
+    }
+  });
+
+  function onboardingNext() {
+    if (onboardingIndex < 3) {
+      onboardingIndex++;
+      slides.scrollTo({ left: onboardingIndex * slides.offsetWidth, behavior: 'smooth' });
+      updateOnboardingDots();
+    } else {
+      goTo('screen-auth');
+    }
+  }
+
+  function resetOnboarding() {
+    onboardingIndex = 0;
+    slides.scrollTo({ left: 0, behavior: 'auto' });
+    updateOnboardingDots();
+  }
+
+  // ----- Items -----
+  function toggleItem(el) {
+    el.classList.toggle('checked');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const allItems = document.querySelectorAll('#screen-list-detail .item');
+    const checked = document.querySelectorAll('#screen-list-detail .item.checked');
+    const total = allItems.length;
+    const done = checked.length;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    document.getElementById('checkedCount').textContent = done;
+    document.getElementById('totalCount').textContent = total;
+    document.getElementById('progressPct').textContent = pct + '%';
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('itemsLeft').textContent = total - done;
+  }
+  updateProgress();
+
+  function addNewItem() {
+    const input = document.getElementById('newItemInput');
+    const name = input.value.trim();
+    if (!name) return;
+
+    // Naive category guess (demo only)
+    const lower = name.toLowerCase();
+    let cat = 'pantry', dot = 'var(--cat-pantry)', label = 'SKAFFERI';
+    if (/mjölk|ost|yoghurt|grädde|smör/.test(lower)) { cat='dairy'; dot='var(--cat-dairy)'; label='MEJERI'; }
+    else if (/banan|äpple|tomat|sallad|gurka|lök|vitlök|broccoli|morot|paprika|citron/.test(lower)) { cat='produce'; dot='var(--cat-produce)'; label='FRUKT & GRÖNT'; }
+    else if (/kött|fisk|kyckling|skinka|bacon|lax/.test(lower)) { cat='meat'; dot='var(--cat-meat)'; label='KÖTT & FISK'; }
+    else if (/bröd|bulle|frallor|kaka/.test(lower)) { cat='bakery'; dot='var(--cat-bakery)'; label='BAGERI'; }
+
+    let section = document.querySelector(`#itemsContainer [data-cat="${cat}"]`);
+    if (!section) {
+      section = document.createElement('div');
+      section.className = 'category-section';
+      section.dataset.cat = cat;
+      section.innerHTML = `
+        <div class="category-header">
+          <div class="category-name"><div class="category-dot" style="background: ${dot};"></div>${label}</div>
+          <div class="category-count">0/0</div>
+        </div>`;
+      document.getElementById('itemsContainer').appendChild(section);
+    }
+
+    const item = document.createElement('div');
+    item.className = 'item';
+    item.onclick = () => toggleItem(item);
+    item.innerHTML = `
+      <div class="item-checkbox"></div>
+      <div class="item-content">
+        <div class="item-row"><span class="item-name">${name.charAt(0).toUpperCase() + name.slice(1)}</span></div>
+        <div class="item-source">Manuellt</div>
+      </div>
+      <div class="item-menu">⋮</div>`;
+    section.appendChild(item);
+    input.value = '';
+    updateProgress();
+    showToast('Tillagt');
+  }
+
+  function clearChecked() {
+    const checked = document.querySelectorAll('#screen-list-detail .item.checked');
+    if (checked.length === 0) { showToast('Inga köpta varor att rensa'); return; }
+    checked.forEach(el => el.remove());
+    updateProgress();
+    showToast(`${checked.length} varor rensade`);
+  }
+
+  // ----- Modals -----
+  function openShareModal() { document.getElementById('shareModal').classList.add('active'); }
+  function openImportModal() { document.getElementById('importModal').classList.add('active'); }
+  function openRecipeModal() { document.getElementById('recipeModal').classList.add('active'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+  function selectPermission(el) {
+    el.parentElement.querySelectorAll('.permission-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  // ----- Toast -----
+  function showToast(message) {
+    const t = document.getElementById('toast');
+    t.textContent = message;
+    t.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  // ----- Language toggle (demo) -----
+  const translations = {
+    sv: {
+      langValue: 'Svenska',
+      langLabel: 'Språk',
+    },
+    en: {
+      langValue: 'English',
+      langLabel: 'Language',
+    }
+  };
+  let currentLang = 'sv';
+  function toggleLanguage() {
+    currentLang = currentLang === 'sv' ? 'en' : 'sv';
+    document.getElementById('langValue').textContent = translations[currentLang].langValue;
+    document.getElementById('langLabel').textContent = translations[currentLang].langLabel;
+    showToast(currentLang === 'sv' ? 'Språk: Svenska' : 'Language: English');
+  }
+</script>
+
+</body>
+</html>

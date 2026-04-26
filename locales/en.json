@@ -1,0 +1,83 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "done": "Done"
+  },
+  "auth": {
+    "sign_in": "Sign in",
+    "sign_up": "Sign up",
+    "sign_out": "Sign out",
+    "email": "Email",
+    "password": "Password",
+    "forgot_password": "Forgot password?",
+    "no_account": "Don't have an account?",
+    "have_account": "Already have an account?"
+  },
+  "list": {
+    "title": "My Lists",
+    "new_list": "New list",
+    "list_name": "List name",
+    "add_item": "Add item",
+    "empty": "No items yet",
+    "checked_items": "Checked items",
+    "archive": "Archive list",
+    "rename": "Rename list"
+  },
+  "item": {
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "note": "Note",
+    "category": "Category"
+  },
+  "share": {
+    "title": "Share list",
+    "copy_link": "Copy link",
+    "link_copied": "Link copied!",
+    "qr_code": "QR code",
+    "permission_view": "View only",
+    "permission_add": "Can add items",
+    "permission_edit": "Can edit",
+    "revoke": "Revoke link"
+  },
+  "guest": {
+    "viewing_list": "Viewing shared list",
+    "sign_up_prompt": "Sign up to create your own lists"
+  },
+  "error": {
+    "invalid_link": "This link is invalid or has expired",
+    "permission_denied": "You don't have permission to do that",
+    "network": "Network error — check your connection",
+    "ai_failed": "AI unavailable — enter items manually"
+  },
+  "category": {
+    "produce": "Produce",
+    "dairy": "Dairy",
+    "meat": "Meat",
+    "seafood": "Seafood",
+    "frozen": "Frozen",
+    "pantry": "Pantry",
+    "bakery": "Bakery",
+    "drinks": "Drinks",
+    "snacks": "Snacks",
+    "hygiene": "Hygiene",
+    "cleaning": "Cleaning",
+    "pets": "Pets",
+    "baby": "Baby",
+    "pharmacy": "Pharmacy",
+    "other": "Other"
+  },
+  "import": {
+    "image_title": "Import from image",
+    "recipe_title": "Import recipe",
+    "paste_url": "Paste recipe URL",
+    "review_title": "Review items",
+    "import_selected": "Import selected",
+    "analyzing": "Analyzing…"
+  }
+}

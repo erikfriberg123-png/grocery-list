@@ -1,0 +1,83 @@
+{
+  "common": {
+    "loading": "Laddar…",
+    "error": "Något gick fel",
+    "retry": "Försök igen",
+    "cancel": "Avbryt",
+    "save": "Spara",
+    "delete": "Ta bort",
+    "edit": "Redigera",
+    "done": "Klar"
+  },
+  "auth": {
+    "sign_in": "Logga in",
+    "sign_up": "Skapa konto",
+    "sign_out": "Logga ut",
+    "email": "E-post",
+    "password": "Lösenord",
+    "forgot_password": "Glömt lösenord?",
+    "no_account": "Har du inget konto?",
+    "have_account": "Har du redan ett konto?"
+  },
+  "list": {
+    "title": "Mina listor",
+    "new_list": "Ny lista",
+    "list_name": "Listnamn",
+    "add_item": "Lägg till vara",
+    "empty": "Inga varor än",
+    "checked_items": "Ikryssade varor",
+    "archive": "Arkivera lista",
+    "rename": "Byt namn"
+  },
+  "item": {
+    "quantity": "Antal",
+    "unit": "Enhet",
+    "note": "Anteckning",
+    "category": "Kategori"
+  },
+  "share": {
+    "title": "Dela lista",
+    "copy_link": "Kopiera länk",
+    "link_copied": "Länk kopierad!",
+    "qr_code": "QR-kod",
+    "permission_view": "Endast visning",
+    "permission_add": "Kan lägga till varor",
+    "permission_edit": "Kan redigera",
+    "revoke": "Återkalla länk"
+  },
+  "guest": {
+    "viewing_list": "Visar delad lista",
+    "sign_up_prompt": "Skapa konto för att göra egna listor"
+  },
+  "error": {
+    "invalid_link": "Den här länken är ogiltig eller har gått ut",
+    "permission_denied": "Du har inte behörighet att göra det",
+    "network": "Nätverksfel — kontrollera anslutningen",
+    "ai_failed": "AI ej tillgänglig — lägg till varor manuellt"
+  },
+  "category": {
+    "produce": "Frukt & grönt",
+    "dairy": "Mejeri",
+    "meat": "Kött",
+    "seafood": "Fisk & skaldjur",
+    "frozen": "Fryst",
+    "pantry": "Skafferi",
+    "bakery": "Bröd & bageri",
+    "drinks": "Drycker",
+    "snacks": "Snacks",
+    "hygiene": "Hygien",
+    "cleaning": "Städ",
+    "pets": "Djur",
+    "baby": "Baby",
+    "pharmacy": "Apotek",
+    "other": "Övrigt"
+  },
+  "import": {
+    "image_title": "Importera från bild",
+    "recipe_title": "Importera recept",
+    "paste_url": "Klistra in recept-URL",
+    "review_title": "Granska varor",
+    "import_selected": "Importera markerade",
+    "analyzing": "Analyserar…"
+  }
+}

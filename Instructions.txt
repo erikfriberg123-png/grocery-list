@@ -1,0 +1,502 @@
+# Instructions for Claude Code: Build a Modern Shared Shopping List & Recipe App
+
+## 1. Product Vision
+
+Build a mobile app that allows households to share shopping lists in real time. The app must support both authenticated users and guests who access lists via secure share links without needing to log in.
+
+The app should make it easy to:
+
+* Create and share shopping lists within a household
+* Add, edit, check off, and remove items
+* Share lists via secure links (no login required for guests)
+* Add items from images (handwritten lists, screenshots, recipes)
+* Add items from recipe URLs
+* Automatically categorize items (e.g., produce, dairy, frozen, pantry)
+* Correct spelling and suggest normalized item names
+* Sort categories based on store layout
+* Provide a modern, intuitive, and fast user experience
+
+The app is initially built for iOS but should be architected for future Android support.
+
+---
+
+## 2. Recommended Tech Stack
+
+### Frontend
+
+* React Native with Expo
+* TypeScript
+* Expo Router for navigation
+* Zustand or React Query for state management
+* React Hook Form + Zod for forms and validation
+* NativeWind (or similar) for styling
+
+### Backend
+
+Use Supabase:
+
+* PostgreSQL database
+* Supabase Auth
+* Row Level Security (RLS)
+* Supabase Realtime
+* Supabase Storage for images
+* Edge Functions for secure logic and AI integration
+
+### AI Features
+
+All AI calls must go through backend/Edge Functions.
+
+AI should support:
+
+* Extracting items from images
+* Extracting ingredients from recipe URLs
+* Categorization
+* Name normalization and spell correction
+* Suggesting quantity/unit when possible
+
+---
+
+## 3. Core Product Principles
+
+9. The app must support multiple languages (at minimum Swedish and English) from the start.
+10. Language should be easy to extend in the future.
+
+---
+
+## 3.1 Localization (i18n) Requirements
+
+The app must support both Swedish and English.
+
+Requirements:
+
+* All user-facing text must use a localization system (no hardcoded strings)
+* Default language should be based on device locale
+* User must be able to switch language manually in settings
+* Support at minimum:
+
+  * Swedish (sv)
+  * English (en)
+* Use a standard i18n library (e.g., i18next or expo-localization)
+* Store translations in structured files (e.g., JSON)
+
+Example structure:
+
+```
+/locales/
+  en.json
+  sv.json
+```
+
+* Keys must be stable and descriptive (e.g., `list.add_item`, `error.invalid_link`)
+* Backend/AI responses should also respect language where possible
+* Category names should be localized but mapped to a canonical internal identifier
+
+---
+
+## 4. User Roles
+
+1. Adding items must be extremely fast.
+2. Sharing should be simple but secure.
+3. Guests should only access what the link allows.
+4. AI should suggest, not silently overwrite.
+5. The app must work even if AI fails.
+6. Users can always manually edit.
+7. Realtime sync must feel instant.
+8. Data model must support multiple households.
+
+---
+
+## 4. User Roles
+
+### 4.1 Authenticated User
+
+Can:
+
+* Create households
+* Create lists
+* Invite members
+* Create share links
+* Manage lists and items
+* Configure category sorting
+
+### 4.2 Household Member
+
+Can:
+
+* View lists
+* Add/edit/check/remove items
+* Use AI features (if enabled)
+
+### 4.3 Guest via Share Link
+
+No login required.
+
+Can (depending on permission):
+
+* View list
+* Add items
+* Check items
+* Remove items
+
+Cannot:
+
+* Access other lists
+* See members
+* Change settings
+* Create links
+
+---
+
+## 5. MVP Scope
+
+### 5.1 Authentication
+
+* Email/password signup
+* Login/logout
+* Session handling
+* Auto-create household on signup
+
+### 5.2 Households
+
+* One household per user (MVP)
+* Support multiple in data model
+
+### 5.3 Shopping Lists
+
+* Create list
+* Rename
+* Archive/delete
+* View all lists
+
+### 5.4 Items
+
+Fields:
+
+* name
+* normalized_name
+* category
+* quantity (optional)
+* unit (optional)
+* note (optional)
+* status (active/checked)
+* sort_order
+* timestamps
+
+Actions:
+
+* Add item (fast input)
+* Bulk add (comma/newline)
+* Edit
+* Check/uncheck
+* Delete
+
+### 5.5 Categories
+
+System categories include:
+
+* Produce
+* Dairy
+* Meat
+* Seafood
+* Frozen
+* Pantry
+* Bakery
+* Drinks
+* Snacks
+* Hygiene
+* Cleaning
+* Pets
+* Baby
+* Pharmacy
+* Other
+
+Users can override category and reorder.
+
+### 5.6 Share Links
+
+* Secure token
+* Scoped to one list
+* Permission: view / add_only / edit
+* Expiration optional
+* Revokable
+
+#### QR Code Support
+
+The app must support generating and displaying a QR code for each share link.
+
+Requirements:
+
+* When a share link is created, the user can also view a QR code representing the link
+* QR code should encode the full share URL
+* QR code must be scannable by standard camera apps
+* Include a dedicated UI for displaying the QR code (e.g., modal or share screen)
+* Allow easy sharing of QR code (e.g., screenshot or native share)
+* Ensure QR codes respect link permissions and expiration
+
+Guest flow via QR:
+
+1. User scans QR code
+2. Opens app (or web fallback if app not installed)
+3. Link is validated server-side
+4. User sees list with correct permissions
+
+Optional (nice-to-have for later):
+
+* Deep linking to open directly in app
+* Branded QR code styling
+
+---
+
+* Secure token
+* Scoped to one list
+* Permission: view / add_only / edit
+* Expiration optional
+* Revokable
+
+### 5.7 Image Import
+
+* Upload image
+* AI extracts items
+* Show review screen
+* User confirms before import
+
+### 5.8 Recipe Import
+
+* Paste URL
+* Fetch server-side
+* Extract ingredients
+* Review before import
+
+### 5.9 Normalization
+
+Examples:
+
+* "milkk" → "milk"
+* "banans" → "bananas"
+* "tomatoes 500g" → parsed into fields
+
+---
+
+## 6. Data Model
+
+Tables:
+
+* profiles
+* households
+* household_members
+* shopping_lists
+* shopping_items
+* categories
+* category_sort_orders
+* share_links
+* ai_import_jobs
+
+Important: Store only hashed share tokens.
+
+---
+
+## 7. Security & RLS
+
+* Users can only access their households
+* Guests can only access via validated token
+* Token validation must happen server-side
+* AI endpoints must validate access
+
+---
+
+## 8. Realtime
+
+Use Supabase Realtime for items.
+
+* Updates sync instantly
+* Last-write-wins strategy
+
+---
+
+## 9. AI Flows
+
+### Text Input
+
+* Parse locally first
+* Fallback to AI
+
+### Image Flow
+
+1. Upload image
+2. Analyze via Edge Function
+3. Return structured JSON
+4. Show review UI
+
+### Recipe Flow
+
+1. Fetch page
+2. Extract structured data
+3. Fallback to AI
+
+---
+
+## 10. UI & UX
+
+### Design
+
+* Clean
+* Fast
+* Mobile-first
+* Large touch targets
+
+### Key Screens
+
+* Auth
+* Lists overview
+* List detail
+* Image import
+* Recipe import
+* Review screen
+* Share screen
+* Guest view
+
+### List Screen
+
+* Fast add input
+* Category grouping
+* Check/uncheck
+* Real-time updates
+
+### Guest View
+
+* No login
+* Minimal UI
+* Permission-based actions
+
+---
+
+## 11. Edge Functions
+
+Required:
+
+* create-share-link
+* validate-share-link
+* guest-list-operation
+* analyze-shopping-image
+* import-recipe-url
+* normalize-shopping-item
+
+---
+
+## 12. Error Handling
+
+Handle:
+
+* Offline
+* Invalid link
+* Permission errors
+* AI failures
+
+Use clear, user-friendly messages.
+
+---
+
+## 13. Testing
+
+Test:
+
+* Permissions
+* Parsing
+* Categories
+* Share links
+* Guest restrictions
+
+Manual scenarios:
+
+* Create account
+* Create list
+* Share link
+* Guest modifies list
+* Realtime sync works
+
+---
+
+## 14. Implementation Phases
+
+1. Project setup
+2. Database + RLS
+3. Core list functionality
+4. Realtime
+5. Sharing
+6. AI normalization
+7. Image import
+8. Recipe import
+9. Polish
+
+---
+
+## 15. Technical Requirements
+
+* TypeScript everywhere
+* Env variables for secrets
+* AI only server-side
+* RLS enabled
+* No plaintext tokens
+
+---
+
+## 16. File Structure
+
+```
+app/
+  (auth)/
+  (tabs)/
+  list/
+  guest/
+  import/
+
+src/
+  components/
+  features/
+  lib/
+  types/
+
+supabase/
+  migrations/
+  functions/
+```
+
+---
+
+## 17. Definition of Done
+
+MVP is complete when:
+
+* Auth works
+* Lists work
+* Realtime sync works
+* Categories auto-assign
+* Share links work
+* Guest access works
+* Image import works
+* Recipe import works
+* App runs on iOS
+
+---
+
+## 18. Key Risks
+
+* Share link security
+* Overcomplicated UX
+
+Keep it simple.
+
+---
+
+## 19. First Task for Claude Code
+
+Start with:
+
+1. Expo + TypeScript setup
+2. Supabase setup
+3. Auth flow
+4. Database schema
+5. RLS policies
+6. Basic list creation + items
+
+Only after this works, move forward.
