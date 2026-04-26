@@ -13,9 +13,15 @@ export function useHousehold() {
         .from('household_members')
         .select('household_id')
         .eq('user_id', user!.id)
-        .single();
+        .maybeSingle();
       if (error) throw error;
-      return data.household_id as string;
+
+      if (data) return data.household_id as string;
+
+      // User pre-dates the trigger — bootstrap their household now
+      const { data: newId, error: bootstrapError } = await supabase.rpc('bootstrap_user_household');
+      if (bootstrapError) throw bootstrapError;
+      return newId as string;
     },
     enabled: !!user,
   });

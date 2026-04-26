@@ -341,6 +341,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bootstrap_user_household: { Args: never; Returns: string }
       is_household_member: { Args: { hid: string }; Returns: boolean }
     }
     Enums: {

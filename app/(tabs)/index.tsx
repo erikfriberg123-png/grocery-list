@@ -43,15 +43,17 @@ export default function ListsScreen() {
 
   const [showNew, setShowNew] = useState(false);
   const [newName, setNewName] = useState('');
+  const [createError, setCreateError] = useState('');
 
   const handleCreate = async () => {
     if (!newName.trim()) return;
+    setCreateError('');
     try {
       await createList.mutateAsync(newName.trim());
       setNewName('');
       setShowNew(false);
     } catch (e: unknown) {
-      Alert.alert('Kunde inte skapa lista', e instanceof Error ? e.message : String(e));
+      setCreateError(e instanceof Error ? e.message : String(e));
     }
   };
 
@@ -174,7 +176,7 @@ export default function ListsScreen() {
       <Modal visible={showNew} transparent animationType="slide">
         <Pressable
           style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }}
-          onPress={() => setShowNew(false)}>
+          onPress={() => { setShowNew(false); setCreateError(''); }}>
           <Pressable style={{ backgroundColor: Colors.cream, borderRadius: 24, padding: 24, marginHorizontal: 0, paddingBottom: 40 }}>
             {/* Handle */}
             <View style={{ width: 36, height: 4, backgroundColor: Colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: 16 }} />
@@ -191,6 +193,9 @@ export default function ListsScreen() {
               onSubmitEditing={handleCreate}
               returnKeyType="done"
             />
+            {createError ? (
+              <Text style={{ color: '#c0392b', fontSize: 13, marginBottom: 10 }}>{createError}</Text>
+            ) : null}
             <Pressable
               style={{ backgroundColor: Colors.green, borderRadius: 14, paddingVertical: 16, alignItems: 'center' }}
               onPress={handleCreate}
