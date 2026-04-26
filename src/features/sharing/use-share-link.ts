@@ -34,8 +34,18 @@ export function useShareLink(listId: string) {
       const { data, error: fnErr } = await supabase.functions.invoke('create-share-link', {
         body: { listId, expiresInDays, permission: 'view' },
       });
-      if (fnErr) throw fnErr;
+
+      // Extract the real error message from the response body when available
+      if (fnErr) {
+        let msg = fnErr.message;
+        try {
+          const body = await (fnErr as { context?: Response }).context?.json();
+          if (body?.error) msg = body.error;
+        } catch { /* ignore parse errors */ }
+        throw new Error(msg);
+      }
       if (data?.error) throw new Error(data.error);
+
       const url = `${getBaseUrl()}/guest/${data.token}`;
       setShareUrl(url);
     } catch (e: unknown) {

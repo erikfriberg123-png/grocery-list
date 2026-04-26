@@ -6,75 +6,82 @@ const cors = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...cors, 'Content-Type': 'application/json' },
+  });
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
 
   try {
+    // 1. Verify the caller's JWT
     const authHeader = req.headers.get('authorization');
-    if (!authHeader) throw new Error('Unauthorized');
+    if (!authHeader) return json({ error: 'Unauthorized' }, 401);
 
-    // Verify caller via their JWT
-    const userClient = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { authorization: authHeader } } },
-    );
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const anonKey    = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { authorization: authHeader } },
+    });
     const { data: { user }, error: authErr } = await userClient.auth.getUser();
-    if (authErr || !user) throw new Error('Unauthorized');
+    if (authErr || !user) return json({ error: 'Unauthorized' }, 401);
 
-    const { listId, expiresInDays, permission = 'view' } = await req.json();
-    if (!listId) throw new Error('listId required');
+    // 2. Parse body
+    const body = await req.json();
+    const { listId, expiresInDays, permission = 'view' } = body ?? {};
+    if (!listId) return json({ error: 'listId required' }, 400);
 
-    // Confirm caller is a household member of this list
-    const { data: sl } = await userClient
+    // 3. Verify membership using service role (avoids RLS edge cases inside functions)
+    const admin = createClient(supabaseUrl, serviceKey);
+
+    const { data: sl, error: slErr } = await admin
       .from('shopping_lists').select('household_id').eq('id', listId).single();
-    if (!sl) throw new Error('List not found');
+    if (slErr || !sl) return json({ error: 'List not found' }, 404);
 
-    const { data: member } = await userClient
+    const { data: member } = await admin
       .from('household_members')
-      .select('id').eq('household_id', sl.household_id).eq('user_id', user.id).single();
-    if (!member) throw new Error('Not a household member');
+      .select('id')
+      .eq('household_id', sl.household_id)
+      .eq('user_id', user.id)
+      .single();
+    if (!member) return json({ error: 'Not a household member' }, 403);
 
-    // Generate 32-byte random token → base64url
+    // 4. Generate 32-byte random token → base64url
     const bytes = new Uint8Array(32);
     crypto.getRandomValues(bytes);
     const token = btoa(String.fromCharCode(...bytes))
       .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 
-    // SHA-256 hash — the plaintext token is never stored
-    const hashBuf = await crypto.subtle.digest(
-      'SHA-256',
-      new TextEncoder().encode(token),
-    );
+    // 5. SHA-256 hash — plaintext never stored
+    const hashBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
     const tokenHash = Array.from(new Uint8Array(hashBuf))
       .map((b) => b.toString(16).padStart(2, '0')).join('');
 
     const expiresAt = expiresInDays
-      ? new Date(Date.now() + expiresInDays * 86_400_000).toISOString()
+      ? new Date(Date.now() + Number(expiresInDays) * 86_400_000).toISOString()
       : null;
 
-    // Insert via service role (bypasses RLS — we already verified membership above)
-    const admin = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-    );
+    // 6. Insert
     const { error: insertErr } = await admin.from('share_links').insert({
       list_id: listId,
       token_hash: tokenHash,
-      token_salt: crypto.randomUUID(), // row identifier, not used for hashing
+      token_salt: crypto.randomUUID(),
       permission,
       created_by: user.id,
       expires_at: expiresAt,
     });
-    if (insertErr) throw insertErr;
+    if (insertErr) {
+      console.error('insert error:', insertErr);
+      return json({ error: insertErr.message }, 500);
+    }
 
-    return new Response(JSON.stringify({ token }), {
-      headers: { ...cors, 'Content-Type': 'application/json' },
-    });
+    return json({ token });
   } catch (err) {
-    return new Response(JSON.stringify({ error: (err as Error).message }), {
-      status: 400,
-      headers: { ...cors, 'Content-Type': 'application/json' },
-    });
+    console.error('unexpected error:', err);
+    return json({ error: (err as Error).message }, 500);
   }
 });
