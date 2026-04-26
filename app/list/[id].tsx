@@ -120,14 +120,20 @@ export default function ListDetail() {
   const clearChecked = useClearChecked();
 
   const [input, setInput] = useState('');
+  const [addError, setAddError] = useState('');
   const inputRef = useRef<TextInput>(null);
 
   const handleAdd = async () => {
     const text = input.trim();
     if (!text) return;
-    setInput('');
-    await addItems.mutateAsync({ listId: id, raw: text });
-    inputRef.current?.focus();
+    setAddError('');
+    try {
+      await addItems.mutateAsync({ listId: id, raw: text });
+      setInput('');
+      inputRef.current?.focus();
+    } catch (e: unknown) {
+      setAddError(e instanceof Error ? e.message : String(e));
+    }
   };
 
   // Group active items by category
@@ -204,6 +210,9 @@ export default function ListDetail() {
                   : <Text style={{ color: 'white', fontWeight: '600', fontSize: 15 }}>Lägg till</Text>}
               </Pressable>
             </View>
+            {addError ? (
+              <Text style={{ color: '#c0392b', fontSize: 13, marginHorizontal: 16, marginBottom: 8 }}>{addError}</Text>
+            ) : null}
 
             {/* Quick actions */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 16 }}>
