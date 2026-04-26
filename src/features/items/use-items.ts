@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { supabase } from '@/src/lib/supabase';
@@ -5,6 +6,22 @@ import { useAuthStore } from '@/src/features/auth/store';
 import { categorizeItem } from '@/src/lib/categorize';
 
 export function useItems(listId: string) {
+  const qc = useQueryClient();
+
+  // Realtime subscription — one per mounted list view, cleaned up on unmount
+  useEffect(() => {
+    const channel = supabase
+      .channel(`items:${listId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'shopping_items', filter: `list_id=eq.${listId}` },
+        () => { qc.invalidateQueries({ queryKey: ['items', listId] }); },
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [listId]);
+
   return useQuery({
     queryKey: ['items', listId],
     queryFn: async () => {
