@@ -33,7 +33,7 @@ export function useAddItems() {
       const rows = names.map((name, i) => ({
         list_id: listId,
         name,
-        sort_order: Date.now() + i,
+        sort_order: Math.floor(Date.now() / 1000) + i,
         added_by: user?.id ?? null,
       }));
 
