@@ -98,7 +98,7 @@ export default function ListsScreen() {
           {t('list.title')}
         </Text>
         <Text style={{ fontSize: 14, color: Colors.muted, marginTop: 4 }}>
-          {activeCount} aktiva · 1 hushåll
+          {t('list.active_count', { count: activeCount })}
         </Text>
       </View>
 
@@ -135,13 +135,13 @@ export default function ListsScreen() {
                   {total > 0 && (
                     <View style={{ backgroundColor: Colors.green, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4 }}>
                       <Text style={{ color: 'white', fontSize: 12, fontWeight: '600' }}>
-                        {remaining} kvar
+                        {remaining} {t('list.remaining')}
                       </Text>
                     </View>
                   )}
                 </View>
                 <Text style={{ fontSize: 13, color: Colors.muted }}>
-                  {checked} av {total} varor klara
+                  {t('list.progress', { checked, total })}
                 </Text>
                 <ProgressBar checked={checked} total={total} />
               </Pressable>

@@ -1,0 +1,96 @@
+{
+  "common": {
+    "loading": "Chargement…",
+    "error": "Une erreur est survenue",
+    "retry": "Réessayer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "done": "Terminé"
+  },
+  "auth": {
+    "sign_in": "Se connecter",
+    "sign_up": "Créer un compte",
+    "sign_out": "Se déconnecter",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "forgot_password": "Mot de passe oublié ?",
+    "no_account": "Pas encore de compte ?",
+    "have_account": "Déjà un compte ?"
+  },
+  "list": {
+    "title": "Mes listes",
+    "new_list": "Nouvelle liste",
+    "list_name": "Nom de la liste",
+    "add_item": "Ajouter un article",
+    "add_button": "Ajouter",
+    "empty": "Aucun article",
+    "checked_items": "Articles cochés",
+    "archive": "Archiver la liste",
+    "rename": "Renommer",
+    "back": "Listes",
+    "remaining": "restant",
+    "progress": "{{checked}} sur {{total}} articles faits",
+    "active_count": "{{count}} actives",
+    "import_image": "Importer une image",
+    "import_recipe": "Coller une recette",
+    "clear_checked": "Vider les cochés"
+  },
+  "item": {
+    "quantity": "Quantité",
+    "unit": "Unité",
+    "note": "Remarque",
+    "category": "Catégorie"
+  },
+  "share": {
+    "title": "Partager la liste",
+    "copy_link": "Copier le lien",
+    "link_copied": "Lien copié !",
+    "qr_code": "QR code",
+    "permission_view": "Lecture seule",
+    "permission_add": "Peut ajouter",
+    "permission_edit": "Peut modifier",
+    "revoke": "Révoquer le lien"
+  },
+  "guest": {
+    "viewing_list": "Liste partagée",
+    "sign_up_prompt": "Créez un compte pour vos propres listes"
+  },
+  "error": {
+    "invalid_link": "Ce lien est invalide ou a expiré",
+    "permission_denied": "Vous n'avez pas la permission",
+    "network": "Erreur réseau — vérifiez votre connexion",
+    "ai_failed": "IA indisponible — ajoutez les articles manuellement"
+  },
+  "category": {
+    "produce": "Fruits & légumes",
+    "dairy": "Produits laitiers",
+    "meat": "Viandes, poissons & charcuterie",
+    "seafood": "Viandes, poissons & charcuterie",
+    "frozen": "Surgelés",
+    "pantry": "Épicerie / produits secs",
+    "bakery": "Pain & pâtisserie",
+    "drinks": "Boissons",
+    "snacks": "Snacks & confiseries",
+    "hygiene": "Ménage & hygiène",
+    "cleaning": "Ménage & hygiène",
+    "pets": "Animaux",
+    "baby": "Bébé",
+    "pharmacy": "Pharmacie",
+    "other": "Autre"
+  },
+  "import": {
+    "image_title": "Importer depuis une image",
+    "recipe_title": "Importer une recette",
+    "paste_url": "Coller l'URL de la recette",
+    "review_title": "Vérifier les articles",
+    "import_selected": "Importer la sélection",
+    "analyzing": "Analyse en cours…"
+  },
+  "settings": {
+    "title": "Foyer",
+    "language": "Langue",
+    "sign_out": "Se déconnecter"
+  }
+}

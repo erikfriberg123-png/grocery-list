@@ -24,10 +24,18 @@
     "new_list": "Ny lista",
     "list_name": "Listnamn",
     "add_item": "Lägg till vara",
+    "add_button": "Lägg till",
     "empty": "Inga varor än",
     "checked_items": "Ikryssade varor",
     "archive": "Arkivera lista",
-    "rename": "Byt namn"
+    "rename": "Byt namn",
+    "back": "Listor",
+    "remaining": "kvar",
+    "progress": "{{checked}} av {{total}} varor klara",
+    "active_count": "{{count}} aktiva",
+    "import_image": "Importera bild",
+    "import_recipe": "Klistra in recept",
+    "clear_checked": "Rensa köpta"
   },
   "item": {
     "quantity": "Antal",
@@ -71,6 +79,11 @@
     "baby": "Baby",
     "pharmacy": "Apotek",
     "other": "Övrigt"
+  },
+  "settings": {
+    "title": "Hushåll",
+    "language": "Språk",
+    "sign_out": "Logga ut"
   },
   "import": {
     "image_title": "Importera från bild",

@@ -24,10 +24,18 @@
     "new_list": "New list",
     "list_name": "List name",
     "add_item": "Add item",
+    "add_button": "Add",
     "empty": "No items yet",
     "checked_items": "Checked items",
     "archive": "Archive list",
-    "rename": "Rename list"
+    "rename": "Rename",
+    "back": "Lists",
+    "remaining": "remaining",
+    "progress": "{{checked}} of {{total}} items done",
+    "active_count": "{{count}} active",
+    "import_image": "Import image",
+    "import_recipe": "Paste recipe",
+    "clear_checked": "Clear checked"
   },
   "item": {
     "quantity": "Quantity",
@@ -71,6 +79,11 @@
     "baby": "Baby",
     "pharmacy": "Pharmacy",
     "other": "Other"
+  },
+  "settings": {
+    "title": "Household",
+    "language": "Language",
+    "sign_out": "Sign out"
   },
   "import": {
     "image_title": "Import from image",

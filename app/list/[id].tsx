@@ -180,7 +180,7 @@ export default function ListDetail() {
           onPress={() => router.canGoBack() ? router.back() : router.replace('/')}>
 
           <Ionicons name="chevron-back" size={22} color={Colors.green} />
-          <Text style={{ color: Colors.green, fontSize: 16, fontWeight: '500' }}>Listor</Text>
+          <Text style={{ color: Colors.green, fontSize: 16, fontWeight: '500' }}>{t('list.back')}</Text>
         </Pressable>
         <Pressable style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.creamCard, borderWidth: 1, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center', marginRight: 8 }}>
           <Ionicons name="share-outline" size={18} color={Colors.greenDark} />
@@ -196,7 +196,7 @@ export default function ListDetail() {
                 {list?.name ?? ''}
               </Text>
               <Text style={{ fontSize: 13, color: Colors.muted, marginTop: 4 }}>
-                {total - checkedCount} {t('list.empty').includes('inga') ? 'kvar' : 'remaining'}
+                {total - checkedCount} {t('list.remaining')}
               </Text>
             </View>
 
@@ -219,7 +219,7 @@ export default function ListDetail() {
                 disabled={addItems.isPending}>
                 {addItems.isPending
                   ? <ActivityIndicator color="white" size="small" />
-                  : <Text style={{ color: 'white', fontWeight: '600', fontSize: 15 }}>Lägg till</Text>}
+                  : <Text style={{ color: 'white', fontWeight: '600', fontSize: 15 }}>{t('list.add_button')}</Text>}
               </Pressable>
             </View>
             {addError ? (
@@ -229,9 +229,9 @@ export default function ListDetail() {
             {/* Quick actions */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 16 }}>
               {[
-                { icon: 'camera-outline' as const, label: 'Importera bild', onPress: () => router.push('/import/image') },
-                { icon: 'link-outline' as const, label: 'Klistra in recept', onPress: () => router.push('/import/recipe') },
-                { icon: 'trash-outline' as const, label: 'Rensa köpta', onPress: () => clearChecked.mutate(id) },
+                { icon: 'camera-outline' as const, label: t('list.import_image'), onPress: () => router.push('/import/image') },
+                { icon: 'link-outline' as const, label: t('list.import_recipe'), onPress: () => router.push('/import/recipe') },
+                { icon: 'trash-outline' as const, label: t('list.clear_checked'), onPress: () => clearChecked.mutate(id) },
               ].map(({ icon, label, onPress }) => (
                 <Pressable
                   key={label}
@@ -248,7 +248,7 @@ export default function ListDetail() {
               <View style={{ marginHorizontal: 24, marginBottom: 16 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
                   <Text style={{ fontSize: 12, color: Colors.muted, fontWeight: '500' }}>
-                    {checkedCount} av {total} varor klara
+                    {t('list.progress', { checked: checkedCount, total })}
                   </Text>
                   <Text style={{ fontSize: 12, color: Colors.muted, fontWeight: '500' }}>{progressPct}%</Text>
                 </View>
