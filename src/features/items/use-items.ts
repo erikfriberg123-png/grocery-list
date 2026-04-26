@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { supabase } from '@/src/lib/supabase';
 import { useAuthStore } from '@/src/features/auth/store';
+import { categorizeItem } from '@/src/lib/categorize';
 
 export function useItems(listId: string) {
   return useQuery({
@@ -33,6 +34,7 @@ export function useAddItems() {
       const rows = names.map((name, i) => ({
         list_id: listId,
         name,
+        category: categorizeItem(name),
         sort_order: Math.floor(Date.now() / 1000) + i,
         added_by: user?.id ?? null,
       }));

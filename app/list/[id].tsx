@@ -142,6 +142,10 @@ export default function ListDetail() {
   const total = items?.length ?? 0;
   const checkedCount = checked.length;
 
+  const CATEGORY_ORDER = [
+    'produce', 'dairy', 'meat', 'frozen', 'bakery', 'pantry', 'drinks', 'snacks', 'hygiene',
+  ];
+
   const categoryGroups = active.reduce<Record<string, Item[]>>((acc, item) => {
     const key = item.category ?? 'other';
     if (!acc[key]) acc[key] = [];
@@ -149,8 +153,15 @@ export default function ListDetail() {
     return acc;
   }, {});
 
+  // Always show the 9 standard sections (even empty), then any uncategorised items, then checked
+  const standardSections = CATEGORY_ORDER.map((cat) => ({
+    category: cat,
+    data: categoryGroups[cat] ?? [],
+  }));
+  const otherItems = categoryGroups['other'] ?? [];
   const sections = [
-    ...Object.entries(categoryGroups).map(([category, data]) => ({ category, data })),
+    ...standardSections,
+    ...(otherItems.length > 0 ? [{ category: 'other', data: otherItems }] : []),
     ...(checked.length > 0 ? [{ category: '__checked__', data: checked }] : []),
   ];
 
@@ -282,19 +293,7 @@ export default function ListDetail() {
             onDelete={() => deleteItem.mutate({ id: item.id, listId: id })}
           />
         )}
-        ListEmptyComponent={
-          !isLoading ? (
-            <View style={{ alignItems: 'center', paddingTop: 40 }}>
-              <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: `${Colors.green}14`, alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
-                <Ionicons name="basket-outline" size={36} color={Colors.green} />
-              </View>
-              <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 22, color: Colors.greenDark, marginBottom: 8 }}>
-                Listan är tom
-              </Text>
-              <Text style={{ fontSize: 14, color: Colors.muted }}>{t('list.add_item')} ovan</Text>
-            </View>
-          ) : <ActivityIndicator color={Colors.green} style={{ marginTop: 40 }} />
-        }
+        ListEmptyComponent={isLoading ? <ActivityIndicator color={Colors.green} style={{ marginTop: 40 }} /> : null}
         contentContainerStyle={{ paddingBottom: 32 }}
       />
     </KeyboardAvoidingView>
