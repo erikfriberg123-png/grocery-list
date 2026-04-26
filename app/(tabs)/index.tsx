@@ -46,9 +46,13 @@ export default function ListsScreen() {
 
   const handleCreate = async () => {
     if (!newName.trim()) return;
-    await createList.mutateAsync(newName);
-    setNewName('');
-    setShowNew(false);
+    try {
+      await createList.mutateAsync(newName.trim());
+      setNewName('');
+      setShowNew(false);
+    } catch (e: unknown) {
+      Alert.alert('Kunde inte skapa lista', e instanceof Error ? e.message : String(e));
+    }
   };
 
   const handleLongPress = (id: string, name: string) => {

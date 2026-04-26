@@ -47,10 +47,12 @@ export function useCreateList() {
 
   return useMutation({
     mutationFn: async (name: string) => {
+      if (!householdId) throw new Error('Household not loaded yet');
+      if (!user) throw new Error('Not authenticated');
       const { error } = await supabase.from('shopping_lists').insert({
-        household_id: householdId!,
+        household_id: householdId,
         name: name.trim(),
-        created_by: user!.id,
+        created_by: user.id,
       });
       if (error) throw error;
     },
