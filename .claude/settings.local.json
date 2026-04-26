@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx expo *)",
+      "Bash(pkill -f \"expo start\")",
+      "Bash(SUPABASE_ACCESS_TOKEN=sbp_c1b2236fd19deb67c73aa205777c2d3fcf5347ac npx supabase gen types typescript --linked --schema public)",
+      "Bash(npx tsc *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "PowerShell(Stop-Process *)",
+      "Bash(SUPABASE_ACCESS_TOKEN=sbp_c1b2236fd19deb67c73aa205777c2d3fcf5347ac npx supabase db push)",
+      "Bash(SUPABASE_ACCESS_TOKEN=sbp_c1b2236fd19deb67c73aa205777c2d3fcf5347ac npx supabase db diff --linked)",
+      "Bash(SUPABASE_ACCESS_TOKEN=sbp_c1b2236fd19deb67c73aa205777c2d3fcf5347ac npx supabase db dump --linked --data-only --schema public -t categories)",
+      "Bash(SUPABASE_ACCESS_TOKEN=sbp_c1b2236fd19deb67c73aa205777c2d3fcf5347ac npx supabase inspect db --help)",
+      "Bash(SUPABASE_ACCESS_TOKEN=sbp_c1b2236fd19deb67c73aa205777c2d3fcf5347ac npx supabase inspect db table-stats --linked)",
+      "Bash(SUPABASE_ACCESS_TOKEN=sbp_c1b2236fd19deb67c73aa205777c2d3fcf5347ac npx supabase inspect db role-stats --linked)",
+      "Bash(SUPABASE_ACCESS_TOKEN=sbp_c1b2236fd19deb67c73aa205777c2d3fcf5347ac npx supabase db dump --linked)",
+      "Bash(npx kill-port *)"
+    ]
+  }
+}

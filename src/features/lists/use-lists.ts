@@ -12,10 +12,27 @@ export function useLists() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('shopping_lists')
-        .select('*')
+        .select('*, shopping_items(id, status)')
         .eq('household_id', householdId!)
         .is('archived_at', null)
         .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!householdId,
+  });
+}
+
+export function useList(id: string) {
+  const { data: householdId } = useHousehold();
+  return useQuery({
+    queryKey: ['list', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('shopping_lists')
+        .select('*')
+        .eq('id', id)
+        .single();
       if (error) throw error;
       return data;
     },
@@ -53,7 +70,10 @@ export function useRenameList() {
         .eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['lists', householdId] }),
+    onSuccess: (_d, { id }) => {
+      qc.invalidateQueries({ queryKey: ['lists', householdId] });
+      qc.invalidateQueries({ queryKey: ['list', id] });
+    },
   });
 }
 

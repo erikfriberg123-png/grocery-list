@@ -82,19 +82,28 @@ export function useDeleteItem() {
   });
 }
 
+export function useClearChecked() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (listId: string) => {
+      const { error } = await supabase
+        .from('shopping_items')
+        .delete()
+        .eq('list_id', listId)
+        .eq('status', 'checked');
+      if (error) throw error;
+    },
+    onSuccess: (_data, listId) =>
+      qc.invalidateQueries({ queryKey: ['items', listId] }),
+  });
+}
+
 export function useUpdateItem() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      listId,
-      name,
-    }: {
-      id: string;
-      listId: string;
-      name: string;
-    }) => {
+    mutationFn: async ({ id, listId, name }: { id: string; listId: string; name: string }) => {
       const { error } = await supabase
         .from('shopping_items')
         .update({ name: name.trim(), updated_at: new Date().toISOString() })
