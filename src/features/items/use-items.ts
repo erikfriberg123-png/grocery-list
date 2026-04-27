@@ -168,6 +168,31 @@ export function useReorderItem() {
   });
 }
 
+export function useAddParsedItems() {
+  const qc = useQueryClient();
+  const user = useAuthStore((s) => s.user);
+
+  return useMutation({
+    mutationFn: async ({ listId, items }: { listId: string; items: ParsedItem[] }) => {
+      const base = Math.floor(Date.now() / 1000);
+      const rows = items.map((item, i) => ({
+        list_id:         listId,
+        name:            item.name,
+        normalized_name: item.normalized_name,
+        quantity:        item.quantity,
+        unit:            item.unit,
+        category:        item.category,
+        sort_order:      base + i,
+        added_by:        user?.id ?? null,
+      }));
+      const { error } = await supabase.from('shopping_items').insert(rows);
+      if (error) throw error;
+    },
+    onSuccess: (_data, { listId }) =>
+      qc.invalidateQueries({ queryKey: ['items', listId] }),
+  });
+}
+
 export function useUpdateItem() {
   const qc = useQueryClient();
 

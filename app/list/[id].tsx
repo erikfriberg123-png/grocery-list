@@ -437,7 +437,7 @@ export default function ListDetail() {
             {/* Quick actions */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 16 }}>
               {[
-                { icon: 'camera-outline' as const, label: t('list.import_image'), onPress: () => router.push('/import/image') },
+                { icon: 'camera-outline' as const, label: t('list.import_image'), onPress: () => router.push({ pathname: '/import/image', params: { listId: id } }) },
                 { icon: 'link-outline' as const, label: t('list.import_recipe'), onPress: () => router.push('/import/recipe') },
                 { icon: 'trash-outline' as const, label: t('list.clear_checked'), onPress: () => clearChecked.mutate(id) },
               ].map(({ icon, label, onPress }) => (

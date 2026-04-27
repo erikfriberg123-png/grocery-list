@@ -106,7 +106,13 @@
     "recipe_title": "Import recipe",
     "paste_url": "Paste recipe URL",
     "review_title": "Review items",
-    "import_selected": "Import selected",
-    "analyzing": "Analyzing…"
+    "import_selected": "Add {{count}} item(s)",
+    "analyzing": "Analyzing image…",
+    "take_photo": "Take a photo",
+    "choose_library": "Choose from library",
+    "no_items_found": "No items found — try another image",
+    "select_all": "Select all",
+    "deselect_all": "Deselect all",
+    "ai_error": "Could not analyze image — try again"
   }
 }

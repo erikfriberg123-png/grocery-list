@@ -101,8 +101,14 @@
     "recipe_title": "Importer une recette",
     "paste_url": "Coller l'URL de la recette",
     "review_title": "Vérifier les articles",
-    "import_selected": "Importer la sélection",
-    "analyzing": "Analyse en cours…"
+    "import_selected": "Ajouter {{count}} article(s)",
+    "analyzing": "Analyse de l'image…",
+    "take_photo": "Prendre une photo",
+    "choose_library": "Choisir dans la bibliothèque",
+    "no_items_found": "Aucun article trouvé — essayez une autre image",
+    "select_all": "Tout sélectionner",
+    "deselect_all": "Tout désélectionner",
+    "ai_error": "Impossible d'analyser l'image — réessayez"
   },
   "settings": {
     "title": "Foyer",

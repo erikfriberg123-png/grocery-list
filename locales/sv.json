@@ -106,7 +106,13 @@
     "recipe_title": "Importera recept",
     "paste_url": "Klistra in recept-URL",
     "review_title": "Granska varor",
-    "import_selected": "Importera markerade",
-    "analyzing": "Analyserar…"
+    "import_selected": "Lägg till {{count}} vara(or)",
+    "analyzing": "Analyserar bild…",
+    "take_photo": "Ta ett foto",
+    "choose_library": "Välj från bibliotek",
+    "no_items_found": "Inga varor hittades — försök med en annan bild",
+    "select_all": "Välj alla",
+    "deselect_all": "Avmarkera alla",
+    "ai_error": "Kunde inte analysera bilden — försök igen"
   }
 }
