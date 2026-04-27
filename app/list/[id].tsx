@@ -62,7 +62,9 @@ function ItemCard({ item, onToggle, onDelete, drag, isActive }: {
   const checked = item.status === 'checked';
   return (
     <Pressable
-      style={{
+      onLongPress={!checked ? drag : undefined}
+      delayLongPress={150}
+      style={({ pressed }) => ({
         backgroundColor: Colors.creamCard,
         marginHorizontal: 16,
         marginBottom: 8,
@@ -73,21 +75,27 @@ function ItemCard({ item, onToggle, onDelete, drag, isActive }: {
         gap: 12,
         borderWidth: 1,
         borderColor: isActive ? Colors.green : 'transparent',
-        opacity: checked ? 0.5 : 1,
+        opacity: checked ? 0.5 : (pressed ? 0.85 : 1),
         elevation: isActive ? 4 : 0,
-      }}
-      onPress={onToggle}>
+      })}>
 
-      <View style={{
-        width: 24, height: 24, borderRadius: 12,
-        borderWidth: 2,
-        borderColor: checked ? Colors.green : '#d4cfc1',
-        backgroundColor: checked ? Colors.green : 'transparent',
-        alignItems: 'center', justifyContent: 'center',
-        flexShrink: 0,
-      }}>
+      {/* Checkbox — the only element that toggles; its own Pressable so it
+          doesn't bleed into the row's long-press drag area */}
+      <Pressable
+        onPress={onToggle}
+        onLongPress={() => {}}
+        delayLongPress={150}
+        hitSlop={{ top: 10, bottom: 10, left: 4, right: 10 }}
+        style={{
+          width: 24, height: 24, borderRadius: 12,
+          borderWidth: 2,
+          borderColor: checked ? Colors.green : '#d4cfc1',
+          backgroundColor: checked ? Colors.green : 'transparent',
+          alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+        }}>
         {checked && <Ionicons name="checkmark" size={14} color="white" />}
-      </View>
+      </Pressable>
 
       <View style={{ flex: 1 }}>
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
@@ -110,13 +118,9 @@ function ItemCard({ item, onToggle, onDelete, drag, isActive }: {
           <Ionicons name="trash-outline" size={16} color={Colors.muted} />
         </Pressable>
       ) : (
-        <Pressable
-          onLongPress={drag}
-          delayLongPress={150}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          style={{ padding: 4 }}>
-          <Ionicons name="reorder-three-outline" size={22} color="#c4bfb1" />
-        </Pressable>
+        <View style={{ padding: 4 }}>
+          <Ionicons name="reorder-three-outline" size={22} color="#d4cfc1" />
+        </View>
       )}
     </Pressable>
   );
