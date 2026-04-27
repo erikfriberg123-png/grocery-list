@@ -85,6 +85,18 @@
     "language": "Språk",
     "sign_out": "Logga ut"
   },
+  "onboarding": {
+    "slide1_title": "Välkommen till Lista",
+    "slide1_subtitle": "Din smarta shoppingkompis för hela hushållet",
+    "slide2_title": "Smarta listor",
+    "slide2_subtitle": "Skapa listor, bocka av varor när du handlar och följ din framsteg i realtid",
+    "slide3_title": "Importera på sekunder",
+    "slide3_subtitle": "Ta ett foto på ett recept eller klistra in en URL — vi plockar ut varorna åt dig",
+    "slide4_title": "Dags att handla",
+    "slide4_subtitle": "Tryck på knappen nedan för att skapa din första lista",
+    "next": "Nästa",
+    "get_started": "Kom igång"
+  },
   "import": {
     "image_title": "Importera från bild",
     "recipe_title": "Importera recept",

@@ -80,6 +80,18 @@
     "pharmacy": "Pharmacie",
     "other": "Autre"
   },
+  "onboarding": {
+    "slide1_title": "Bienvenue sur Lista",
+    "slide1_subtitle": "Votre compagnon shopping intelligent pour tout le foyer",
+    "slide2_title": "Listes intelligentes",
+    "slide2_subtitle": "Créez des listes, cochez les articles au fur et à mesure et suivez votre progression en temps réel",
+    "slide3_title": "Importez en quelques secondes",
+    "slide3_subtitle": "Prenez une photo d'une recette ou collez une URL — nous extrairons les articles pour vous",
+    "slide4_title": "Prêt à faire les courses",
+    "slide4_subtitle": "Appuyez sur le bouton ci-dessous pour créer votre première liste",
+    "next": "Suivant",
+    "get_started": "Commencer"
+  },
   "import": {
     "image_title": "Importer depuis une image",
     "recipe_title": "Importer une recette",
