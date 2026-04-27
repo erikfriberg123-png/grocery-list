@@ -3,7 +3,24 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { supabase } from '@/src/lib/supabase';
 import { useAuthStore } from '@/src/features/auth/store';
-import { categorizeItem } from '@/src/lib/categorize';
+import { parseItem, type ParsedItem } from '@/src/lib/parse-item';
+
+/** Tries the Edge Function with a 3-second timeout, falls back to client-side parser. */
+async function normalizeItem(text: string): Promise<ParsedItem> {
+  const edgeFn = supabase.functions.invoke('normalize-shopping-item', {
+    body: { text },
+  });
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('timeout')), 3000),
+  );
+  try {
+    const { data, error } = await Promise.race([edgeFn, timeout]);
+    if (error || !data?.name) throw error ?? new Error('empty');
+    return data as ParsedItem;
+  } catch {
+    return parseItem(text);
+  }
+}
 
 export function useItems(listId: string) {
   const qc = useQueryClient();
@@ -43,17 +60,24 @@ export function useAddItems() {
 
   return useMutation({
     mutationFn: async ({ listId, raw }: { listId: string; raw: string }) => {
-      const names = raw
+      const texts = raw
         .split(/[,\n]/)
         .map((s) => s.trim())
         .filter(Boolean);
 
-      const rows = names.map((name, i) => ({
-        list_id: listId,
-        name,
-        category: categorizeItem(name),
-        sort_order: Math.floor(Date.now() / 1000) + i,
-        added_by: user?.id ?? null,
+      // Normalize all items in parallel (AI with client-side fallback)
+      const parsed = await Promise.all(texts.map(normalizeItem));
+
+      const base = Math.floor(Date.now() / 1000);
+      const rows = parsed.map((item, i) => ({
+        list_id:         listId,
+        name:            item.name,
+        normalized_name: item.normalized_name,
+        quantity:        item.quantity,
+        unit:            item.unit,
+        category:        item.category,
+        sort_order:      base + i,
+        added_by:        user?.id ?? null,
       }));
 
       const { error } = await supabase.from('shopping_items').insert(rows);
