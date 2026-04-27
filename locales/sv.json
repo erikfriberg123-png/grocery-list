@@ -40,7 +40,8 @@
     "active_count": "{{count}} aktiva",
     "import_image": "Importera bild",
     "import_recipe": "Klistra in recept",
-    "clear_checked": "Rensa köpta"
+    "clear_checked": "Rensa köpta",
+    "shopping_mode": "Handlingsläge"
   },
   "item": {
     "quantity": "Antal",

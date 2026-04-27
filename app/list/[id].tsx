@@ -43,8 +43,8 @@ type Item = {
   sort_order: number;
 };
 
-type HeaderRow       = { type: 'header'; category: string; count: number };
-type ItemRow         = { type: 'item'; item: Item };
+type HeaderRow        = { type: 'header'; category: string; count: number };
+type ItemRow          = { type: 'item'; item: Item };
 type CheckedHeaderRow = { type: 'checked_header' };
 type FlatRow = HeaderRow | ItemRow | CheckedHeaderRow;
 
@@ -78,7 +78,6 @@ function ItemCard({ item, onToggle, onDelete, drag, isActive }: {
       }}
       onPress={onToggle}>
 
-      {/* Checkbox */}
       <View style={{
         width: 24, height: 24, borderRadius: 12,
         borderWidth: 2,
@@ -90,7 +89,6 @@ function ItemCard({ item, onToggle, onDelete, drag, isActive }: {
         {checked && <Ionicons name="checkmark" size={14} color="white" />}
       </View>
 
-      {/* Name + quantity */}
       <View style={{ flex: 1 }}>
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
           <Text style={{ fontSize: 16, fontWeight: '600', color: Colors.text, textDecorationLine: checked ? 'line-through' : 'none' }}>
@@ -104,7 +102,6 @@ function ItemCard({ item, onToggle, onDelete, drag, isActive }: {
         </View>
       </View>
 
-      {/* Drag handle for active items, delete button for checked */}
       {checked ? (
         <Pressable
           onPress={onDelete}
@@ -144,6 +141,48 @@ function CategoryHeader({ category, count }: { category: string; count: number }
   );
 }
 
+function ShoppingItemRow({ item, onToggle }: { item: Item; onToggle: () => void }) {
+  const checked = item.status === 'checked';
+  return (
+    <Pressable
+      onPress={onToggle}
+      style={({ pressed }) => ({
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 14,
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+        backgroundColor: pressed ? '#f5f1e8' : 'transparent',
+      })}>
+      <View style={{
+        width: 28, height: 28, borderRadius: 14,
+        borderWidth: 2,
+        borderColor: checked ? Colors.green : '#d4cfc1',
+        backgroundColor: checked ? Colors.green : 'transparent',
+        alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0,
+      }}>
+        {checked && <Ionicons name="checkmark" size={16} color="white" />}
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={{
+          fontSize: 17,
+          fontWeight: '500',
+          color: checked ? Colors.muted : Colors.text,
+          textDecorationLine: checked ? 'line-through' : 'none',
+        }}>
+          {item.name}
+        </Text>
+        {(item.quantity || item.unit) && (
+          <Text style={{ fontSize: 13, color: Colors.muted, marginTop: 1 }}>
+            {[item.quantity, item.unit].filter(Boolean).join(' ')}
+          </Text>
+        )}
+      </View>
+    </Pressable>
+  );
+}
+
 function ShareSheet({ listId, onClose }: { listId: string; onClose: () => void }) {
   const { t } = useTranslation();
   const [selectedDays, setSelectedDays] = useState<number | null>(7);
@@ -153,14 +192,12 @@ function ShareSheet({ listId, onClose }: { listId: string; onClose: () => void }
     <Modal visible transparent animationType="slide">
       <Pressable style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }} onPress={onClose}>
         <Pressable style={{ backgroundColor: Colors.cream, borderRadius: 24, padding: 24, paddingBottom: 40 }}>
-          {/* Handle */}
           <View style={{ width: 36, height: 4, backgroundColor: Colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: 20 }} />
 
           <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 22, color: Colors.greenDark, marginBottom: 20 }}>
             {t('share.title')}
           </Text>
 
-          {/* Expiry picker */}
           <Text style={{ fontSize: 12, fontWeight: '700', color: Colors.muted, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 }}>
             Giltighetstid
           </Text>
@@ -185,7 +222,6 @@ function ShareSheet({ listId, onClose }: { listId: string; onClose: () => void }
             })}
           </View>
 
-          {/* Create button */}
           {!shareUrl && (
             <Pressable
               style={{ backgroundColor: Colors.green, borderRadius: 14, paddingVertical: 14, alignItems: 'center', marginBottom: 8 }}
@@ -201,7 +237,6 @@ function ShareSheet({ listId, onClose }: { listId: string; onClose: () => void }
             <Text style={{ color: '#c0392b', fontSize: 13, textAlign: 'center', marginBottom: 8 }}>{error}</Text>
           )}
 
-          {/* QR + copy once link exists */}
           {shareUrl && (
             <View style={{ alignItems: 'center', gap: 16 }}>
               <View style={{ backgroundColor: 'white', padding: 16, borderRadius: 16, borderWidth: 1, borderColor: Colors.border }}>
@@ -229,11 +264,11 @@ export default function ListDetail() {
   const { t } = useTranslation();
   const { data: list } = useList(id);
   const { data: items, isLoading } = useItems(id);
-  const addItems    = useAddItems();
-  const toggleItem  = useToggleItem();
-  const deleteItem  = useDeleteItem();
+  const addItems     = useAddItems();
+  const toggleItem   = useToggleItem();
+  const deleteItem   = useDeleteItem();
   const clearChecked = useClearChecked();
-  const reorderItem = useReorderItem();
+  const reorderItem  = useReorderItem();
 
   const saveAsTemplate = useSaveAsTemplate();
 
@@ -243,6 +278,7 @@ export default function ListDetail() {
   const [showSaveTpl, setShowSaveTpl] = useState(false);
   const [tplName, setTplName]         = useState('');
   const [tplSaved, setTplSaved]       = useState(false);
+  const [shoppingMode, setShoppingMode] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
   const handleAdd = async () => {
@@ -259,13 +295,29 @@ export default function ListDetail() {
     }
   };
 
-  const active      = items?.filter((i) => i.status === 'active') ?? [];
-  const checked     = items?.filter((i) => i.status === 'checked') ?? [];
-  const total       = items?.length ?? 0;
+  const active       = items?.filter((i) => i.status === 'active') ?? [];
+  const checked      = items?.filter((i) => i.status === 'checked') ?? [];
+  const total        = items?.length ?? 0;
   const checkedCount = checked.length;
   const progressPct  = total === 0 ? 0 : Math.round((checkedCount / total) * 100);
 
-  // Flatten sections into a single list: headers are non-draggable anchors
+  // Group all items by category for shopping mode
+  const shoppingGroups = useMemo(() => {
+    return (items ?? []).reduce<Record<string, Item[]>>((acc, item) => {
+      const key = item.category ?? 'other';
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(item);
+      return acc;
+    }, {});
+  }, [items]);
+
+  // Only categories that have at least one item
+  const shoppingCategories = useMemo(() => {
+    return [...CATEGORY_ORDER, 'other'].filter(
+      (cat) => (shoppingGroups[cat]?.length ?? 0) > 0,
+    );
+  }, [shoppingGroups]);
+
   const flatData = useMemo<FlatRow[]>(() => {
     const groups = active.reduce<Record<string, Item[]>>((acc, item) => {
       const key = item.category ?? 'other';
@@ -303,7 +355,6 @@ export default function ListDetail() {
     const movedRow = data[to];
     if (movedRow?.type !== 'item' || movedRow.item.status !== 'active') return;
 
-    // Nearest header above the dropped position = new category
     let newCategory: string | null = null;
     for (let i = to - 1; i >= 0; i--) {
       const row = data[i];
@@ -314,7 +365,6 @@ export default function ListDetail() {
       if (row.type === 'checked_header') break;
     }
 
-    // Interpolate sort_order between neighbours
     const activeItems = data.filter((r): r is ItemRow => r.type === 'item' && r.item.status === 'active');
     const newIdx = activeItems.findIndex(r => r.item.id === movedRow.item.id);
     const prev = activeItems[newIdx - 1]?.item;
@@ -375,6 +425,96 @@ export default function ListDetail() {
     );
   };
 
+  // ── Shopping mode ─────────────────────────────────────────────────────────
+  if (shoppingMode) {
+    const donePct = total === 0 ? 0 : Math.round((checkedCount / total) * 100);
+
+    return (
+      <View style={{ flex: 1, backgroundColor: Colors.cream }}>
+        {/* Header */}
+        <View style={{
+          paddingHorizontal: 20,
+          paddingTop: 54,
+          paddingBottom: 14,
+          borderBottomWidth: 1,
+          borderBottomColor: Colors.border,
+          backgroundColor: Colors.cream,
+        }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Pressable
+              onPress={() => setShoppingMode(false)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 20, backgroundColor: Colors.creamCard, borderWidth: 1, borderColor: Colors.border }}>
+              <Ionicons name="close" size={20} color={Colors.greenDark} />
+            </Pressable>
+            <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 20, color: Colors.greenDark, flex: 1, textAlign: 'center', marginHorizontal: 12 }} numberOfLines={1}>
+              {list?.name}
+            </Text>
+            <View style={{ width: 40, alignItems: 'flex-end' }}>
+              <Text style={{ fontSize: 14, color: Colors.muted, fontWeight: '600' }}>
+                {checkedCount}/{total}
+              </Text>
+            </View>
+          </View>
+          {total > 0 && (
+            <View style={{ height: 3, backgroundColor: Colors.border, borderRadius: 2, marginTop: 14, overflow: 'hidden' }}>
+              <View style={{ height: 3, backgroundColor: Colors.green, borderRadius: 2, width: `${donePct}%` }} />
+            </View>
+          )}
+        </View>
+
+        <ScrollView contentContainerStyle={{ paddingTop: 8, paddingBottom: 48 }}>
+          {shoppingCategories.map((cat) => {
+            const catItems = shoppingGroups[cat] ?? [];
+            const activeInCat = catItems.filter((i) => i.status === 'active').length;
+            const sorted = [...catItems].sort((a, b) => {
+              if (a.status !== b.status) return a.status === 'active' ? -1 : 1;
+              return a.sort_order - b.sort_order;
+            });
+            return (
+              <View key={cat} style={{ marginBottom: 4 }}>
+                <CategoryHeader category={cat} count={activeInCat} />
+                <View style={{
+                  marginHorizontal: 16,
+                  borderRadius: 16,
+                  backgroundColor: Colors.creamCard,
+                  borderWidth: 1,
+                  borderColor: Colors.border,
+                  overflow: 'hidden',
+                }}>
+                  {sorted.map((item, idx) => (
+                    <View key={item.id}>
+                      {idx > 0 && (
+                        <View style={{ height: 1, backgroundColor: Colors.border, marginLeft: 62 }} />
+                      )}
+                      <ShoppingItemRow
+                        item={item}
+                        onToggle={() => {
+                          if (item.status === 'active') soundCheck();
+                          toggleItem.mutate({ id: item.id, listId: id, status: item.status === 'active' ? 'checked' : 'active' });
+                        }}
+                      />
+                    </View>
+                  ))}
+                </View>
+              </View>
+            );
+          })}
+
+          {shoppingCategories.length === 0 && (
+            <View style={{ alignItems: 'center', marginTop: 60, gap: 12 }}>
+              <Ionicons name="checkmark-circle" size={52} color={Colors.green} />
+              <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 24, color: Colors.greenDark }}>
+                {t('list.empty')}
+              </Text>
+            </View>
+          )}
+        </ScrollView>
+      </View>
+    );
+  }
+
+  // ── Regular view ──────────────────────────────────────────────────────────
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: Colors.cream }}
@@ -475,8 +615,33 @@ export default function ListDetail() {
           </View>
         }
         ListEmptyComponent={isLoading ? <ActivityIndicator color={Colors.green} style={{ marginTop: 40 }} /> : null}
-        contentContainerStyle={{ paddingBottom: 32 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
       />
+
+      {/* Shopping mode button */}
+      <View style={{ position: 'absolute', bottom: 28, left: 16, right: 16 }}>
+        <Pressable
+          style={({ pressed }) => ({
+            backgroundColor: pressed ? Colors.greenDark : Colors.green,
+            borderRadius: 18,
+            paddingVertical: 18,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 10,
+            shadowColor: '#2d6a4f',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.25,
+            shadowRadius: 10,
+            elevation: 6,
+          })}
+          onPress={() => setShoppingMode(true)}>
+          <Ionicons name="cart-outline" size={22} color="white" />
+          <Text style={{ color: 'white', fontSize: 17, fontWeight: '700', letterSpacing: 0.3 }}>
+            {t('list.shopping_mode')}
+          </Text>
+        </Pressable>
+      </View>
 
       {showShare && <ShareSheet listId={id} onClose={() => setShowShare(false)} />}
 

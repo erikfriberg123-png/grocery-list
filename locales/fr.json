@@ -40,7 +40,8 @@
     "active_count": "{{count}} actives",
     "import_image": "Importer une image",
     "import_recipe": "Coller une recette",
-    "clear_checked": "Vider les cochés"
+    "clear_checked": "Vider les cochés",
+    "shopping_mode": "Mode courses"
   },
   "item": {
     "quantity": "Quantité",

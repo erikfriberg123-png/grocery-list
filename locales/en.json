@@ -40,7 +40,8 @@
     "active_count": "{{count}} active",
     "import_image": "Import image",
     "import_recipe": "Paste recipe",
-    "clear_checked": "Clear checked"
+    "clear_checked": "Clear checked",
+    "shopping_mode": "Shopping mode"
   },
   "item": {
     "quantity": "Quantity",
