@@ -19,6 +19,7 @@ import {
 import { Colors, categoryColor } from '@/constants/colors';
 import { soundAdd, soundCheck, soundReorder } from '@/src/lib/sounds';
 import { useList } from '@/src/features/lists/use-lists';
+import { useSaveAsTemplate } from '@/src/features/templates/use-templates';
 import {
   useAddItems,
   useClearChecked,
@@ -234,9 +235,14 @@ export default function ListDetail() {
   const clearChecked = useClearChecked();
   const reorderItem = useReorderItem();
 
-  const [input, setInput]       = useState('');
-  const [addError, setAddError] = useState('');
-  const [showShare, setShowShare] = useState(false);
+  const saveAsTemplate = useSaveAsTemplate();
+
+  const [input, setInput]             = useState('');
+  const [addError, setAddError]       = useState('');
+  const [showShare, setShowShare]     = useState(false);
+  const [showSaveTpl, setShowSaveTpl] = useState(false);
+  const [tplName, setTplName]         = useState('');
+  const [tplSaved, setTplSaved]       = useState(false);
   const inputRef = useRef<TextInput>(null);
 
   const handleAdd = async () => {
@@ -439,6 +445,7 @@ export default function ListDetail() {
               {[
                 { icon: 'camera-outline' as const, label: t('list.import_image'), onPress: () => router.push({ pathname: '/import/image', params: { listId: id } }) },
                 { icon: 'link-outline' as const, label: t('list.import_recipe'), onPress: () => router.push('/import/recipe') },
+                { icon: 'bookmark-outline' as const, label: t('template.save_as'), onPress: () => { setTplName(list?.name ?? ''); setTplSaved(false); setShowSaveTpl(true); } },
                 { icon: 'trash-outline' as const, label: t('list.clear_checked'), onPress: () => clearChecked.mutate(id) },
               ].map(({ icon, label, onPress }) => (
                 <Pressable
@@ -472,6 +479,49 @@ export default function ListDetail() {
       />
 
       {showShare && <ShareSheet listId={id} onClose={() => setShowShare(false)} />}
+
+      {/* Save as template modal */}
+      <Modal visible={showSaveTpl} transparent animationType="slide">
+        <Pressable
+          style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }}
+          onPress={() => setShowSaveTpl(false)}>
+          <Pressable style={{ backgroundColor: Colors.cream, borderRadius: 24, padding: 24, paddingBottom: 40 }}>
+            <View style={{ width: 36, height: 4, backgroundColor: Colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: 16 }} />
+            <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 22, color: Colors.greenDark, marginBottom: 16 }}>
+              {t('template.save_as')}
+            </Text>
+            {tplSaved ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 16 }}>
+                <Ionicons name="checkmark-circle" size={24} color={Colors.green} />
+                <Text style={{ fontSize: 16, color: Colors.green, fontWeight: '600' }}>{t('template.saved')}</Text>
+              </View>
+            ) : (
+              <>
+                <TextInput
+                  style={{ backgroundColor: Colors.creamCard, borderWidth: 1, borderColor: Colors.border, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14, fontSize: 16, color: Colors.text, marginBottom: 16 }}
+                  placeholder={t('template.template_name')}
+                  placeholderTextColor={Colors.muted}
+                  value={tplName}
+                  onChangeText={setTplName}
+                  autoFocus
+                />
+                <Pressable
+                  style={{ backgroundColor: tplName.trim() ? Colors.green : Colors.border, borderRadius: 14, paddingVertical: 16, alignItems: 'center' }}
+                  disabled={!tplName.trim() || saveAsTemplate.isPending}
+                  onPress={async () => {
+                    await saveAsTemplate.mutateAsync({ listId: id, name: tplName });
+                    setTplSaved(true);
+                    setTimeout(() => setShowSaveTpl(false), 1200);
+                  }}>
+                  {saveAsTemplate.isPending
+                    ? <ActivityIndicator color="white" />
+                    : <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>{t('common.save')}</Text>}
+                </Pressable>
+              </>
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }

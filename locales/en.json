@@ -85,6 +85,16 @@
     "pharmacy": "Pharmacy",
     "other": "Other"
   },
+  "template": {
+    "save_as": "Save as template",
+    "template_name": "Template name",
+    "saved": "Saved as template!",
+    "from_template": "From template",
+    "choose": "Choose a template",
+    "no_templates": "No saved templates yet",
+    "items": "{{count}} items",
+    "delete": "Delete template"
+  },
   "settings": {
     "title": "Household",
     "language": "Language",

@@ -110,6 +110,16 @@
     "deselect_all": "Tout désélectionner",
     "ai_error": "Impossible d'analyser l'image — réessayez"
   },
+  "template": {
+    "save_as": "Enregistrer comme modèle",
+    "template_name": "Nom du modèle",
+    "saved": "Enregistré comme modèle !",
+    "from_template": "Depuis un modèle",
+    "choose": "Choisir un modèle",
+    "no_templates": "Aucun modèle enregistré",
+    "items": "{{count}} articles",
+    "delete": "Supprimer le modèle"
+  },
   "settings": {
     "title": "Foyer",
     "language": "Langue",

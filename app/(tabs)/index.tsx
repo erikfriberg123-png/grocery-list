@@ -16,6 +16,7 @@ import {
 
 import { Colors } from '@/constants/colors';
 import { useCreateList, useLists, useArchiveList, useRenameList } from '@/src/features/lists/use-lists';
+import { useTemplates, useCreateFromTemplate, useDeleteTemplate } from '@/src/features/templates/use-templates';
 
 function LogoIcon() {
   return (
@@ -41,9 +42,14 @@ export default function ListsScreen() {
   const archiveList = useArchiveList();
   const renameList = useRenameList();
 
-  const [showNew, setShowNew] = useState(false);
-  const [newName, setNewName] = useState('');
+  const { data: templates } = useTemplates();
+  const createFromTemplate = useCreateFromTemplate();
+  const deleteTemplate = useDeleteTemplate();
+
+  const [showNew, setShowNew]         = useState(false);
+  const [newName, setNewName]         = useState('');
   const [createError, setCreateError] = useState('');
+  const [showTpl, setShowTpl]         = useState(false);
 
   const handleCreate = async () => {
     if (!newName.trim()) return;
@@ -169,8 +175,86 @@ export default function ListsScreen() {
               {t('list.new_list')}
             </Text>
           </Pressable>
+
+          {/* From template button — only shown when templates exist */}
+          {(templates?.length ?? 0) > 0 && (
+            <Pressable
+              style={({ pressed }) => ({
+                marginHorizontal: 24,
+                marginTop: 8,
+                padding: 16,
+                borderWidth: 1,
+                borderColor: pressed ? Colors.green : Colors.border,
+                borderRadius: 16,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                backgroundColor: Colors.creamCard,
+              })}
+              onPress={() => setShowTpl(true)}>
+              <Ionicons name="bookmark-outline" size={16} color={Colors.greenDark} />
+              <Text style={{ fontSize: 15, fontWeight: '500', color: Colors.greenDark }}>
+                {t('template.from_template')}
+              </Text>
+            </Pressable>
+          )}
         </ScrollView>
       )}
+
+      {/* From template modal */}
+      <Modal visible={showTpl} transparent animationType="slide">
+        <Pressable
+          style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }}
+          onPress={() => setShowTpl(false)}>
+          <Pressable style={{ backgroundColor: Colors.cream, borderRadius: 24, padding: 24, paddingBottom: 40, maxHeight: '70%' }}>
+            <View style={{ width: 36, height: 4, backgroundColor: Colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: 16 }} />
+            <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 22, color: Colors.greenDark, marginBottom: 16 }}>
+              {t('template.choose')}
+            </Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {(templates ?? []).map((tpl) => (
+                <Pressable
+                  key={tpl.id}
+                  style={({ pressed }) => ({
+                    backgroundColor: pressed ? Colors.greenLight : Colors.creamCard,
+                    borderRadius: 14,
+                    padding: 16,
+                    marginBottom: 8,
+                    borderWidth: 1,
+                    borderColor: Colors.border,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  })}
+                  onPress={async () => {
+                    setShowTpl(false);
+                    const listId = await createFromTemplate.mutateAsync({ templateId: tpl.id, name: tpl.name });
+                    router.push(`/list/${listId}`);
+                  }}
+                  onLongPress={() =>
+                    Alert.alert(tpl.name, undefined, [
+                      {
+                        text: t('template.delete'),
+                        style: 'destructive',
+                        onPress: () => deleteTemplate.mutate(tpl.id),
+                      },
+                      { text: t('common.cancel'), style: 'cancel' },
+                    ])
+                  }>
+                  <View style={{ gap: 2 }}>
+                    <Text style={{ fontSize: 16, fontWeight: '600', color: Colors.text }}>{tpl.name}</Text>
+                    <Text style={{ fontSize: 13, color: Colors.muted }}>
+                      {t('template.items', { count: tpl.list_template_items.length })}
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color={Colors.muted} />
+                </Pressable>
+              ))}
+            </ScrollView>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* New list modal */}
       <Modal visible={showNew} transparent animationType="slide">

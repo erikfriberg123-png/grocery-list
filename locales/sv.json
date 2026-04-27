@@ -85,6 +85,16 @@
     "pharmacy": "Apotek",
     "other": "Övrigt"
   },
+  "template": {
+    "save_as": "Spara som mall",
+    "template_name": "Mallnamn",
+    "saved": "Sparad som mall!",
+    "from_template": "Från mall",
+    "choose": "Välj en mall",
+    "no_templates": "Inga sparade mallar än",
+    "items": "{{count}} varor",
+    "delete": "Ta bort mall"
+  },
   "settings": {
     "title": "Hushåll",
     "language": "Språk",
