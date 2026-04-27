@@ -15,9 +15,14 @@
     "sign_out": "Se déconnecter",
     "email": "E-mail",
     "password": "Mot de passe",
+    "confirm_password": "Confirmer le mot de passe",
     "forgot_password": "Mot de passe oublié ?",
     "no_account": "Pas encore de compte ?",
-    "have_account": "Déjà un compte ?"
+    "have_account": "Déjà un compte ?",
+    "welcome_back": "Bon retour",
+    "create_account": "Créer un compte",
+    "confirm_email_title": "Vérifiez votre e-mail",
+    "confirm_email_body": "Nous avons envoyé un lien de confirmation. Ouvrez-le pour activer votre compte."
   },
   "list": {
     "title": "Mes listes",
@@ -87,10 +92,9 @@
     "slide2_subtitle": "Créez des listes, cochez les articles au fur et à mesure et suivez votre progression en temps réel",
     "slide3_title": "Importez en quelques secondes",
     "slide3_subtitle": "Prenez une photo d'une recette ou collez une URL — nous extrairons les articles pour vous",
-    "slide4_title": "Prêt à faire les courses",
-    "slide4_subtitle": "Appuyez sur le bouton ci-dessous pour créer votre première liste",
     "next": "Suivant",
-    "get_started": "Commencer"
+    "get_started": "Commencer",
+    "skip": "Passer"
   },
   "import": {
     "image_title": "Importer depuis une image",

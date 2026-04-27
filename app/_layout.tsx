@@ -8,7 +8,7 @@ import { useFonts } from 'expo-font';
 import { useRouter, useSegments, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -19,10 +19,9 @@ import { queryClient } from '@/src/lib/query-client';
 SplashScreen.preventAutoHideAsync();
 
 function AuthGate() {
-  const { session, initialized, setSession, setInitialized } = useAuthStore();
+  const { session, initialized, onboardingDone, setSession, setInitialized, setOnboardingDone } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
-  const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -45,13 +44,25 @@ function AuthGate() {
     if (!initialized || onboardingDone === null) return;
     const inAuthGroup = segments[0] === '(auth)';
     const inOnboarding = segments[0] === 'onboarding';
+    const inTabs = segments[0] === '(tabs)';
 
-    if (!session && !inAuthGroup) {
-      router.replace('/(auth)/sign-in');
-    } else if (session && !onboardingDone && !inOnboarding) {
-      router.replace('/onboarding');
-    } else if (session && onboardingDone && (inAuthGroup || inOnboarding)) {
-      router.replace('/(tabs)');
+    if (session) {
+      if (!onboardingDone) {
+        // Logged in without seeing onboarding — complete silently
+        AsyncStorage.setItem('onboarding_complete', 'true');
+        setOnboardingDone(true);
+        if (!inTabs) router.replace('/(tabs)');
+      } else {
+        if (inAuthGroup || inOnboarding) router.replace('/(tabs)');
+      }
+    } else {
+      if (onboardingDone) {
+        // Returning user who logged out — go straight to sign-in
+        if (!inAuthGroup) router.replace('/(auth)/sign-in');
+      } else {
+        // New user — go through onboarding (login is the last step)
+        if (!inOnboarding) router.replace('/onboarding');
+      }
     }
   }, [session, initialized, segments, onboardingDone]);
 
