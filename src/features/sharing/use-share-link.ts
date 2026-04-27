@@ -3,13 +3,13 @@ import { Platform } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { supabase } from '@/src/lib/supabase';
 
-export type ExpiryOption = { label: string; days: number | null };
+export type ExpiryOption = { key: string; days: number | null };
 
 export const EXPIRY_OPTIONS: ExpiryOption[] = [
-  { label: '1 dag',    days: 1 },
-  { label: '7 dagar',  days: 7 },
-  { label: '30 dagar', days: 30 },
-  { label: 'Alltid',   days: null },
+  { key: 'share.expiry_1day',    days: 1 },
+  { key: 'share.expiry_7days',   days: 7 },
+  { key: 'share.expiry_30days',  days: 30 },
+  { key: 'share.expiry_forever', days: null },
 ];
 
 function getBaseUrl(): string {
@@ -31,19 +31,24 @@ export function useShareLink(listId: string) {
     setError(null);
     setShareUrl(null);
     try {
-      const { data, error: fnErr } = await supabase.functions.invoke('create-share-link', {
-        body: { listId, expiresInDays, permission: 'view' },
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error('Not logged in');
+
+      const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
+      const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
+
+      const res = await fetch(`${supabaseUrl}/functions/v1/create-share-link`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': anonKey,
+        },
+        body: JSON.stringify({ listId, expiresInDays, permission: 'view' }),
       });
 
-      // Extract the real error message from the response body when available
-      if (fnErr) {
-        let msg = fnErr.message;
-        try {
-          const body = await (fnErr as { context?: Response }).context?.json();
-          if (body?.error) msg = body.error;
-        } catch { /* ignore parse errors */ }
-        throw new Error(msg);
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error ?? `HTTP ${res.status}`);
       if (data?.error) throw new Error(data.error);
 
       const url = `${getBaseUrl()}/guest/${data.token}`;

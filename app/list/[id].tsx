@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from '@/src/components/DraggableList';
 import QRCode from 'react-native-qrcode-svg';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -219,7 +219,7 @@ function ShareSheet({ listId, onClose }: { listId: string; onClose: () => void }
                     backgroundColor: active ? `${Colors.green}12` : Colors.creamCard,
                   }}>
                   <Text style={{ fontSize: 12, fontWeight: active ? '700' : '500', color: active ? Colors.green : Colors.text }}>
-                    {opt.label}
+                    {t(opt.key)}
                   </Text>
                 </Pressable>
               );
@@ -352,7 +352,7 @@ export default function ListDetail() {
     return rows;
   }, [items]);
 
-  const handleDragEnd = ({ data, from, to }: { data: FlatRow[]; from: number; to: number }) => {
+  const handleDragEnd = useCallback(({ data, from, to }: { data: FlatRow[]; from: number; to: number }) => {
     if (from === to) return;
     soundReorder();
 
@@ -391,15 +391,15 @@ export default function ListDetail() {
       category: newCategory,
       sortOrder: newSortOrder,
     });
-  };
+  }, [reorderItem, id]);
 
-  const keyExtractor = (row: FlatRow, index: number): string => {
+  const keyExtractor = useCallback((row: FlatRow, _index: number): string => {
     if (row.type === 'header') return `header-${row.category}`;
     if (row.type === 'checked_header') return 'checked_header';
     return `item-${row.item.id}`;
-  };
+  }, []);
 
-  const renderItem = ({ item: row, drag, isActive }: RenderItemParams<FlatRow>) => {
+  const renderItem = useCallback(({ item: row, drag, isActive }: RenderItemParams<FlatRow>) => {
     if (row.type === 'header') {
       return <CategoryHeader category={row.category} count={row.count} />;
     }
@@ -427,7 +427,7 @@ export default function ListDetail() {
         />
       </ScaleDecorator>
     );
-  };
+  }, [t, id, toggleItem, deleteItem]);
 
   // ── Shopping mode ─────────────────────────────────────────────────────────
   if (shoppingMode) {

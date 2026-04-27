@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
-  FlatList,
   Modal,
   Pressable,
   ScrollView,
@@ -114,7 +113,7 @@ export default function ListsScreen() {
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
           {(lists ?? []).map((list) => {
-            const items = (list as any).shopping_items as { id: string; status: string }[] ?? [];
+            const items = ((list as unknown) as { shopping_items: { id: string; status: string }[] }).shopping_items ?? [];
             const total = items.length;
             const checked = items.filter((i) => i.status === 'checked').length;
             const remaining = total - checked;
