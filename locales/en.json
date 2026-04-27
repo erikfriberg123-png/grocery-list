@@ -38,8 +38,7 @@
     "remaining": "remaining",
     "progress": "{{checked}} of {{total}} items done",
     "active_count": "{{count}} active",
-    "import_image": "Import image",
-    "import_recipe": "Paste recipe",
+    "import": "Import",
     "clear_checked": "Clear checked",
     "shopping_mode": "Shopping mode"
   },
@@ -113,6 +112,9 @@
     "skip": "Skip"
   },
   "import": {
+    "title": "Import",
+    "from_image": "From image",
+    "paste_recipe": "Paste recipe",
     "image_title": "Import from image",
     "recipe_title": "Import recipe",
     "paste_url": "Paste recipe URL",
@@ -124,6 +126,10 @@
     "no_items_found": "No items found — try another image",
     "select_all": "Select all",
     "deselect_all": "Deselect all",
-    "ai_error": "Could not analyze image — try again"
+    "ai_error": "Could not analyze image — try again",
+    "image_hint": "Point at a handwritten list, recipe page, or any photo with grocery items.",
+    "recipe_hint": "Paste a recipe or list of ingredients. One item per line.",
+    "recipe_placeholder": "2 cloves garlic\n500g pasta\n1 can tomatoes…",
+    "find_items": "Find items"
   }
 }

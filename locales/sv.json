@@ -38,8 +38,7 @@
     "remaining": "kvar",
     "progress": "{{checked}} av {{total}} varor klara",
     "active_count": "{{count}} aktiva",
-    "import_image": "Importera bild",
-    "import_recipe": "Klistra in recept",
+    "import": "Importera",
     "clear_checked": "Rensa köpta",
     "shopping_mode": "Handlingsläge"
   },
@@ -113,6 +112,9 @@
     "skip": "Hoppa över"
   },
   "import": {
+    "title": "Importera",
+    "from_image": "Från bild",
+    "paste_recipe": "Klistra in recept",
     "image_title": "Importera från bild",
     "recipe_title": "Importera recept",
     "paste_url": "Klistra in recept-URL",
@@ -124,6 +126,10 @@
     "no_items_found": "Inga varor hittades — försök med en annan bild",
     "select_all": "Välj alla",
     "deselect_all": "Avmarkera alla",
-    "ai_error": "Kunde inte analysera bilden — försök igen"
+    "ai_error": "Kunde inte analysera bilden — försök igen",
+    "image_hint": "Rikta mot en handskriven lista, receptsida eller bild med matvaror.",
+    "recipe_hint": "Klistra in ett recept eller en inköpslista. En vara per rad.",
+    "recipe_placeholder": "2 vitlöksklyftor\n500g pasta\n1 burk tomater…",
+    "find_items": "Hitta varor"
   }
 }

@@ -509,6 +509,29 @@ export default function ListDetail() {
               </Text>
             </View>
           )}
+
+          {checkedCount > 0 && (
+            <Pressable
+              style={({ pressed }) => ({
+                marginHorizontal: 16,
+                marginTop: 16,
+                paddingVertical: 14,
+                borderRadius: 14,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                backgroundColor: pressed ? '#fef2f2' : 'transparent',
+                borderWidth: 1,
+                borderColor: '#f5c6c6',
+              })}
+              onPress={() => clearChecked.mutate(id)}>
+              <Ionicons name="trash-outline" size={15} color="#c0392b" />
+              <Text style={{ fontSize: 14, fontWeight: '500', color: '#c0392b' }}>
+                {t('list.clear_checked')}
+              </Text>
+            </Pressable>
+          )}
         </ScrollView>
       </View>
     );
@@ -583,10 +606,8 @@ export default function ListDetail() {
             {/* Quick actions */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 16 }}>
               {[
-                { icon: 'camera-outline' as const, label: t('list.import_image'), onPress: () => router.push({ pathname: '/import/image', params: { listId: id } }) },
-                { icon: 'link-outline' as const, label: t('list.import_recipe'), onPress: () => router.push('/import/recipe') },
+                { icon: 'download-outline' as const, label: t('list.import'), onPress: () => router.push({ pathname: '/import/image', params: { listId: id } }) },
                 { icon: 'bookmark-outline' as const, label: t('template.save_as'), onPress: () => { setTplName(list?.name ?? ''); setTplSaved(false); setShowSaveTpl(true); } },
-                { icon: 'trash-outline' as const, label: t('list.clear_checked'), onPress: () => clearChecked.mutate(id) },
               ].map(({ icon, label, onPress }) => (
                 <Pressable
                   key={label}
@@ -615,6 +636,31 @@ export default function ListDetail() {
           </View>
         }
         ListEmptyComponent={isLoading ? <ActivityIndicator color={Colors.green} style={{ marginTop: 40 }} /> : null}
+        ListFooterComponent={
+          checkedCount > 0 ? (
+            <Pressable
+              style={({ pressed }) => ({
+                marginHorizontal: 16,
+                marginTop: 8,
+                marginBottom: 4,
+                paddingVertical: 14,
+                borderRadius: 14,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                backgroundColor: pressed ? '#fef2f2' : 'transparent',
+                borderWidth: 1,
+                borderColor: '#f5c6c6',
+              })}
+              onPress={() => clearChecked.mutate(id)}>
+              <Ionicons name="trash-outline" size={15} color="#c0392b" />
+              <Text style={{ fontSize: 14, fontWeight: '500', color: '#c0392b' }}>
+                {t('list.clear_checked')}
+              </Text>
+            </Pressable>
+          ) : null
+        }
         contentContainerStyle={{ paddingBottom: 120 }}
       />
 

@@ -38,8 +38,7 @@
     "remaining": "restant",
     "progress": "{{checked}} sur {{total}} articles faits",
     "active_count": "{{count}} actives",
-    "import_image": "Importer une image",
-    "import_recipe": "Coller une recette",
+    "import": "Importer",
     "clear_checked": "Vider les cochés",
     "shopping_mode": "Mode courses"
   },
@@ -98,6 +97,9 @@
     "skip": "Passer"
   },
   "import": {
+    "title": "Importer",
+    "from_image": "Depuis une image",
+    "paste_recipe": "Coller une recette",
     "image_title": "Importer depuis une image",
     "recipe_title": "Importer une recette",
     "paste_url": "Coller l'URL de la recette",
@@ -109,7 +111,11 @@
     "no_items_found": "Aucun article trouvé — essayez une autre image",
     "select_all": "Tout sélectionner",
     "deselect_all": "Tout désélectionner",
-    "ai_error": "Impossible d'analyser l'image — réessayez"
+    "ai_error": "Impossible d'analyser l'image — réessayez",
+    "image_hint": "Pointez vers une liste manuscrite, une page de recette ou toute photo d'articles.",
+    "recipe_hint": "Collez une recette ou une liste d'ingrédients. Un article par ligne.",
+    "recipe_placeholder": "2 gousses d'ail\n500g de pâtes\n1 boîte de tomates…",
+    "find_items": "Trouver les articles"
   },
   "template": {
     "save_as": "Enregistrer comme modèle",
