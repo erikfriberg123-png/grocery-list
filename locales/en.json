@@ -7,7 +7,16 @@
     "save": "Save",
     "delete": "Delete",
     "edit": "Edit",
-    "done": "Done"
+    "done": "Done",
+    "back": "Back",
+    "coming_soon": "Coming soon",
+    "permission_needed": "Permission needed"
+  },
+  "nav": {
+    "lists": "Lists",
+    "recipes": "Recipes",
+    "plan": "Plan",
+    "household": "Household"
   },
   "auth": {
     "sign_in": "Sign in",
@@ -22,7 +31,9 @@
     "welcome_back": "Welcome back",
     "create_account": "Create account",
     "confirm_email_title": "Check your email",
-    "confirm_email_body": "We sent a confirmation link. Open it to activate your account."
+    "confirm_email_body": "We sent a confirmation link. Open it to activate your account.",
+    "email_placeholder": "you@example.com",
+    "password_placeholder": "••••••••"
   },
   "list": {
     "title": "My Lists",
@@ -52,6 +63,8 @@
     "title": "Share list",
     "copy_link": "Copy link",
     "link_copied": "Link copied!",
+    "copied": "Copied!",
+    "expiry_label": "Validity",
     "qr_code": "QR code",
     "permission_view": "View only",
     "permission_add": "Can add items",
@@ -130,6 +143,8 @@
     "image_hint": "Point at a handwritten list, recipe page, or any photo with grocery items.",
     "recipe_hint": "Paste a recipe or list of ingredients. One item per line.",
     "recipe_placeholder": "2 cloves garlic\n500g pasta\n1 can tomatoes…",
-    "find_items": "Find items"
+    "find_items": "Find items",
+    "permission_camera": "Camera access is required to take photos.",
+    "permission_library": "Photo library access is required."
   }
 }

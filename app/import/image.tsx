@@ -65,14 +65,14 @@ export default function ImportScreen() {
     if (source === 'camera') {
       const perm = await ImagePicker.requestCameraPermissionsAsync();
       if (!perm.granted) {
-        Alert.alert('Permission needed', 'Camera access is required to take photos.');
+        Alert.alert(t('common.permission_needed'), t('import.permission_camera'));
         return;
       }
       result = await ImagePicker.launchCameraAsync(options);
     } else {
       const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!perm.granted) {
-        Alert.alert('Permission needed', 'Photo library access is required.');
+        Alert.alert(t('common.permission_needed'), t('import.permission_library'));
         return;
       }
       result = await ImagePicker.launchImageLibraryAsync(options);

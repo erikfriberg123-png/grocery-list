@@ -7,7 +7,16 @@
     "save": "Spara",
     "delete": "Ta bort",
     "edit": "Redigera",
-    "done": "Klar"
+    "done": "Klar",
+    "back": "Tillbaka",
+    "coming_soon": "Kommer snart",
+    "permission_needed": "Behörighet krävs"
+  },
+  "nav": {
+    "lists": "Lista",
+    "recipes": "Recept",
+    "plan": "Planera",
+    "household": "Hushåll"
   },
   "auth": {
     "sign_in": "Logga in",
@@ -22,7 +31,9 @@
     "welcome_back": "Välkommen tillbaka",
     "create_account": "Skapa konto",
     "confirm_email_title": "Kolla din e-post",
-    "confirm_email_body": "Vi skickade en bekräftningslänk. Öppna den för att aktivera ditt konto."
+    "confirm_email_body": "Vi skickade en bekräftningslänk. Öppna den för att aktivera ditt konto.",
+    "email_placeholder": "du@exempel.se",
+    "password_placeholder": "••••••••"
   },
   "list": {
     "title": "Mina listor",
@@ -52,6 +63,8 @@
     "title": "Dela lista",
     "copy_link": "Kopiera länk",
     "link_copied": "Länk kopierad!",
+    "copied": "Kopierad!",
+    "expiry_label": "Giltighetstid",
     "qr_code": "QR-kod",
     "permission_view": "Endast visning",
     "permission_add": "Kan lägga till varor",
@@ -130,6 +143,8 @@
     "image_hint": "Rikta mot en handskriven lista, receptsida eller bild med matvaror.",
     "recipe_hint": "Klistra in ett recept eller en inköpslista. En vara per rad.",
     "recipe_placeholder": "2 vitlöksklyftor\n500g pasta\n1 burk tomater…",
-    "find_items": "Hitta varor"
+    "find_items": "Hitta varor",
+    "permission_camera": "Kameraåtkomst krävs för att ta foton.",
+    "permission_library": "Åtkomst till fotobiblioteket krävs."
   }
 }

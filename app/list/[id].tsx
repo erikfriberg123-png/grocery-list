@@ -199,7 +199,7 @@ function ShareSheet({ listId, onClose }: { listId: string; onClose: () => void }
           </Text>
 
           <Text style={{ fontSize: 12, fontWeight: '700', color: Colors.muted, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 }}>
-            Giltighetstid
+            {t('share.expiry_label')}
           </Text>
           <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
             {EXPIRY_OPTIONS.map((opt) => {
@@ -248,7 +248,7 @@ function ShareSheet({ listId, onClose }: { listId: string; onClose: () => void }
                 onPress={copyLink}>
                 <Ionicons name={copied ? 'checkmark' : 'copy-outline'} size={16} color={copied ? Colors.greenDark : 'white'} />
                 <Text style={{ color: copied ? Colors.greenDark : 'white', fontWeight: '600', fontSize: 15 }}>
-                  {copied ? 'Kopierad!' : t('share.copy_link')}
+                  {copied ? t('share.copied') : t('share.copy_link')}
                 </Text>
               </Pressable>
             </View>

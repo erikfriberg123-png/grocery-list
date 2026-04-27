@@ -7,7 +7,16 @@
     "save": "Enregistrer",
     "delete": "Supprimer",
     "edit": "Modifier",
-    "done": "Terminé"
+    "done": "Terminé",
+    "back": "Retour",
+    "coming_soon": "Bientôt disponible",
+    "permission_needed": "Permission requise"
+  },
+  "nav": {
+    "lists": "Listes",
+    "recipes": "Recettes",
+    "plan": "Planifier",
+    "household": "Foyer"
   },
   "auth": {
     "sign_in": "Se connecter",
@@ -22,7 +31,9 @@
     "welcome_back": "Bon retour",
     "create_account": "Créer un compte",
     "confirm_email_title": "Vérifiez votre e-mail",
-    "confirm_email_body": "Nous avons envoyé un lien de confirmation. Ouvrez-le pour activer votre compte."
+    "confirm_email_body": "Nous avons envoyé un lien de confirmation. Ouvrez-le pour activer votre compte.",
+    "email_placeholder": "vous@exemple.fr",
+    "password_placeholder": "••••••••"
   },
   "list": {
     "title": "Mes listes",
@@ -52,6 +63,8 @@
     "title": "Partager la liste",
     "copy_link": "Copier le lien",
     "link_copied": "Lien copié !",
+    "copied": "Copié !",
+    "expiry_label": "Durée de validité",
     "qr_code": "QR code",
     "permission_view": "Lecture seule",
     "permission_add": "Peut ajouter",
@@ -115,7 +128,9 @@
     "image_hint": "Pointez vers une liste manuscrite, une page de recette ou toute photo d'articles.",
     "recipe_hint": "Collez une recette ou une liste d'ingrédients. Un article par ligne.",
     "recipe_placeholder": "2 gousses d'ail\n500g de pâtes\n1 boîte de tomates…",
-    "find_items": "Trouver les articles"
+    "find_items": "Trouver les articles",
+    "permission_camera": "L'accès à la caméra est nécessaire pour prendre des photos.",
+    "permission_library": "L'accès à la photothèque est nécessaire."
   },
   "template": {
     "save_as": "Enregistrer comme modèle",

@@ -161,7 +161,7 @@ function AuthStep({ onBack }: { onBack: () => void }) {
           onPress={onBack}
           style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 40 }}>
           <Ionicons name="chevron-back" size={20} color={Colors.muted} />
-          <Text style={{ color: Colors.muted, fontSize: 14 }}>Back</Text>
+          <Text style={{ color: Colors.muted, fontSize: 14 }}>{t('common.back')}</Text>
         </Pressable>
 
         {/* App logo */}
@@ -216,7 +216,7 @@ function AuthStep({ onBack }: { onBack: () => void }) {
                     onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
-                    placeholder="you@example.com"
+                    placeholder={t('auth.email_placeholder')}
                     placeholderTextColor={Colors.muted}
                   />
                   {signInForm.formState.errors.email && (
@@ -242,7 +242,7 @@ function AuthStep({ onBack }: { onBack: () => void }) {
                     onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
-                    placeholder="••••••••"
+                    placeholder={t('auth.password_placeholder')}
                     placeholderTextColor={Colors.muted}
                   />
                   {signInForm.formState.errors.password && (
@@ -286,7 +286,7 @@ function AuthStep({ onBack }: { onBack: () => void }) {
                     onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
-                    placeholder="you@example.com"
+                    placeholder={t('auth.email_placeholder')}
                     placeholderTextColor={Colors.muted}
                   />
                   {signUpForm.formState.errors.email && (
@@ -312,7 +312,7 @@ function AuthStep({ onBack }: { onBack: () => void }) {
                     onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
-                    placeholder="••••••••"
+                    placeholder={t('auth.password_placeholder')}
                     placeholderTextColor={Colors.muted}
                   />
                   {signUpForm.formState.errors.password && (

@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { Colors } from '@/constants/colors';
 
@@ -11,6 +12,8 @@ function TabIcon({ name, color }: { name: IoniconsName; color: string }) {
 }
 
 export default function TabLayout() {
+  const { t } = useTranslation();
+
   return (
     <Tabs
       screenOptions={{
@@ -35,28 +38,28 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Lista',
+          title: t('nav.lists'),
           tabBarIcon: ({ color }) => <TabIcon name="checkbox-outline" color={color} />,
         }}
       />
       <Tabs.Screen
         name="recipes"
         options={{
-          title: 'Recept',
+          title: t('nav.recipes'),
           tabBarIcon: ({ color }) => <TabIcon name="book-outline" color={color} />,
         }}
       />
       <Tabs.Screen
         name="plan"
         options={{
-          title: 'Planera',
+          title: t('nav.plan'),
           tabBarIcon: ({ color }) => <TabIcon name="calendar-outline" color={color} />,
         }}
       />
       <Tabs.Screen
         name="household"
         options={{
-          title: 'Hushåll',
+          title: t('nav.household'),
           tabBarIcon: ({ color }) => <TabIcon name="people-outline" color={color} />,
         }}
       />

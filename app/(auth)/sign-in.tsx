@@ -120,7 +120,7 @@ export default function SignIn() {
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
-                placeholder="you@example.com"
+                placeholder={t('auth.email_placeholder')}
                 placeholderTextColor={Colors.muted}
               />
               {errors.email && (
@@ -148,7 +148,7 @@ export default function SignIn() {
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
-                placeholder="••••••••"
+                placeholder={t('auth.password_placeholder')}
                 placeholderTextColor={Colors.muted}
               />
               {errors.password && (
