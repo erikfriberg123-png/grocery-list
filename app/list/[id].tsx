@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
+import DraggableFlatList, { ScaleDecorator, RenderItemParams } from '@/src/components/DraggableList';
 import QRCode from 'react-native-qrcode-svg';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 
 import { Colors, categoryColor } from '@/constants/colors';
+import { soundAdd, soundCheck, soundReorder } from '@/src/lib/sounds';
 import { useList } from '@/src/features/lists/use-lists';
 import {
   useAddItems,
@@ -244,6 +245,7 @@ export default function ListDetail() {
     setAddError('');
     try {
       await addItems.mutateAsync({ listId: id, raw: text });
+      soundAdd();
       setInput('');
       inputRef.current?.focus();
     } catch (e: unknown) {
@@ -290,6 +292,7 @@ export default function ListDetail() {
 
   const handleDragEnd = ({ data, from, to }: { data: FlatRow[]; from: number; to: number }) => {
     if (from === to) return;
+    soundReorder();
 
     const movedRow = data[to];
     if (movedRow?.type !== 'item' || movedRow.item.status !== 'active') return;
@@ -354,7 +357,10 @@ export default function ListDetail() {
       <ScaleDecorator activeScale={0.97}>
         <ItemCard
           item={item}
-          onToggle={() => toggleItem.mutate({ id: item.id, listId: id, status: item.status === 'active' ? 'checked' : 'active' })}
+          onToggle={() => {
+            if (item.status === 'active') soundCheck();
+            toggleItem.mutate({ id: item.id, listId: id, status: item.status === 'active' ? 'checked' : 'active' });
+          }}
           onDelete={() => deleteItem.mutate({ id: item.id, listId: id })}
           drag={drag}
           isActive={isActive}
