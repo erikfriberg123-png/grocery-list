@@ -1,3 +1,4 @@
+import { readAsStringAsync } from 'expo-file-system/legacy';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { supabase } from '@/src/lib/supabase';
@@ -59,12 +60,18 @@ async function uploadImage(
   const mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
   const path     = `${householdId}/${Date.now()}.${ext}`;
 
-  // arrayBuffer() works correctly for file:// URIs on React Native; blob() does not.
-  const arrayBuffer = await fetch(localUri).then((r) => r.arrayBuffer());
+  // expo-file-system handles all local URI schemes (file://, ph://, content://)
+  // reliably on both iOS and Android. atob() is available in RN 0.70+.
+  const base64 = await readAsStringAsync(localUri, { encoding: 'base64' });
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
 
   const { error } = await supabase.storage
     .from('recipe-images')
-    .upload(path, arrayBuffer, { contentType: mimeType, upsert: false });
+    .upload(path, bytes, { contentType: mimeType, upsert: false });
 
   if (error) throw error;
   return path;

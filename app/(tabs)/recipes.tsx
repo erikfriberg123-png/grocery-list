@@ -307,17 +307,20 @@ function RecipeSheet({
   visible: boolean;
   editingRecipe: Recipe | null;
   defaultCategory: RecipeCategory;
-  onSave: (form: RecipeForm, existingImagePath: string | null) => void;
+  onSave: (form: RecipeForm, existingImagePath: string | null) => Promise<void>;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
   const colors = useThemeColors();
-  const [form, setForm] = useState<RecipeForm>(EMPTY_FORM);
+  const [form, setForm]     = useState<RecipeForm>(EMPTY_FORM);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   const set = <K extends keyof RecipeForm>(field: K, value: RecipeForm[K]) =>
     setForm(prev => ({ ...prev, [field]: value }));
 
   const handleShow = () => {
+    setSaveError('');
     if (editingRecipe) {
       setForm({
         name:          editingRecipe.name,
@@ -331,10 +334,18 @@ function RecipeSheet({
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name.trim()) return;
-    onSave(form, editingRecipe?.image_path ?? null);
-    onClose();
+    setSaving(true);
+    setSaveError('');
+    try {
+      await onSave(form, editingRecipe?.image_path ?? null);
+      onClose();
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : t('common.error'));
+    } finally {
+      setSaving(false);
+    }
   };
 
   // What to show in the image picker:
@@ -459,16 +470,23 @@ function RecipeSheet({
               />
 
               {/* Save */}
+              {saveError ? (
+                <Text style={{ color: colors.dangerText, fontSize: 13, textAlign: 'center', marginBottom: 8 }}>
+                  {saveError}
+                </Text>
+              ) : null}
               <Pressable
                 onPress={handleSave}
-                disabled={!form.name.trim()}
+                disabled={!form.name.trim() || saving}
                 style={({ pressed }) => ({
-                  backgroundColor: form.name.trim()
+                  backgroundColor: (form.name.trim() && !saving)
                     ? (pressed ? colors.greenDark : colors.green)
                     : colors.border,
                   borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 4,
                 })}>
-                <Text style={{ color: 'white', fontSize: 16, fontWeight: '700' }}>{t('common.save')}</Text>
+                {saving
+                  ? <ActivityIndicator color="white" />
+                  : <Text style={{ color: 'white', fontSize: 16, fontWeight: '700' }}>{t('common.save')}</Text>}
               </Pressable>
             </ScrollView>
           </Pressable>
@@ -502,8 +520,8 @@ export default function RecipesScreen() {
     return matchesCat && matchesSearch;
   });
 
-  const handleSave = (form: RecipeForm, existingImagePath: string | null) => {
-    upsertRecipe.mutate({ id: editingId ?? undefined, form, existingImagePath });
+  const handleSave = async (form: RecipeForm, existingImagePath: string | null) => {
+    await upsertRecipe.mutateAsync({ id: editingId ?? undefined, form, existingImagePath });
     setEditingId(null);
   };
 
