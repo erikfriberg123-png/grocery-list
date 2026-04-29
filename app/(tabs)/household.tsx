@@ -1,14 +1,22 @@
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Switch, Text, View } from 'react-native';
 
 import { useThemeColors, useThemeStore } from '@/src/features/theme/use-theme';
 import { useAuth } from '@/src/features/auth/use-auth';
+import { useAuthStore } from '@/src/features/auth/store';
 import { SUPPORTED_LANGUAGES, useLanguage, type LangCode } from '@/src/features/language/use-language';
 
 export default function HouseholdScreen() {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
+  const setOnboardingDone = useAuthStore((s) => s.setOnboardingDone);
+
+  const resetOnboarding = async () => {
+    await AsyncStorage.removeItem('onboarding_complete');
+    setOnboardingDone(false);
+  };
   const { currentLanguage, setLanguage } = useLanguage();
   const colors = useThemeColors();
   const { mode, toggle } = useThemeStore();
@@ -114,6 +122,28 @@ export default function HouseholdScreen() {
             />
           </Pressable>
         </View>
+      </View>
+
+      {/* Onboarding */}
+      <View style={{ marginHorizontal: 24, marginBottom: 28 }}>
+        <Pressable
+          onPress={resetOnboarding}
+          style={({ pressed }) => ({
+            backgroundColor: pressed ? colors.greenLight : colors.creamCard,
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: 14,
+            paddingVertical: 14,
+            paddingHorizontal: 16,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 10,
+          })}>
+          <Ionicons name="play-circle-outline" size={18} color={colors.green} />
+          <Text style={{ fontSize: 15, fontWeight: '500', color: colors.text }}>
+            {t('settings.show_onboarding')}
+          </Text>
+        </Pressable>
       </View>
 
       {/* Sign out */}

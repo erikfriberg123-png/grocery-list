@@ -162,7 +162,8 @@
     "language": "Språk",
     "appearance": "Utseende",
     "dark_mode": "Mörkt läge",
-    "sign_out": "Logga ut"
+    "sign_out": "Logga ut",
+    "show_onboarding": "Visa introduktionen igen"
   },
   "onboarding": {
     "slide1_title": "Välkommen till Lista",

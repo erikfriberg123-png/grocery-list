@@ -162,7 +162,8 @@
     "language": "Language",
     "appearance": "Appearance",
     "dark_mode": "Dark mode",
-    "sign_out": "Sign out"
+    "sign_out": "Sign out",
+    "show_onboarding": "Show intro again"
   },
   "onboarding": {
     "slide1_title": "Welcome to Lista",
