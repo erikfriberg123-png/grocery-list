@@ -173,7 +173,9 @@
     "slide3_subtitle": "Ta ett foto på ett recept eller klistra in en URL — vi plockar ut varorna åt dig",
     "next": "Nästa",
     "get_started": "Kom igång",
-    "skip": "Hoppa över"
+    "skip": "Hoppa över",
+    "slide4_title": "Svep för att agera",
+    "slide4_subtitle": "Svep höger för att redigera en vara, svep vänster för att ta bort den"
   },
   "plan": {
     "title": "Måltidsplan",

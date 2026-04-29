@@ -173,7 +173,9 @@
     "slide3_subtitle": "Snap a photo of a recipe or paste a URL — we'll pull out the items for you",
     "next": "Next",
     "get_started": "Get started",
-    "skip": "Skip"
+    "skip": "Skip",
+    "slide4_title": "Swipe to act",
+    "slide4_subtitle": "Swipe right to edit an item, swipe left to delete it"
   },
   "plan": {
     "title": "Meal Plan",

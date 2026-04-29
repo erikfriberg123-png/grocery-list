@@ -48,6 +48,13 @@ const INFO_SLIDES = [
     iconColor: Colors.green,
     iconBg: Colors.greenLight,
   },
+  {
+    icon: 'swap-horizontal-outline' as const,
+    titleKey: 'onboarding.slide4_title',
+    subtitleKey: 'onboarding.slide4_subtitle',
+    iconColor: Colors.green,
+    iconBg: Colors.greenLight,
+  },
 ];
 
 const TOTAL_DOTS = INFO_SLIDES.length + 1;
@@ -424,23 +431,51 @@ export default function OnboardingScreen() {
               paddingHorizontal: 40,
               paddingBottom: 180,
             }}>
-            <View
-              style={{
-                width: 108,
-                height: 108,
-                borderRadius: 54,
-                backgroundColor: slide.iconBg,
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 44,
-                shadowColor: Colors.green,
-                shadowOpacity: 0.15,
-                shadowRadius: 20,
-                shadowOffset: { width: 0, height: 8 },
-                elevation: 4,
-              }}>
-              <Ionicons name={slide.icon} size={48} color={slide.iconColor} />
-            </View>
+            {i === 3 ? (
+              /* Swipe demo */
+              <View style={{ width: '100%', marginBottom: 44 }}>
+                {/* Edit row */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                  <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: '#22c55e', borderRadius: 14, paddingVertical: 14, paddingHorizontal: 16, gap: 8 }}>
+                    <Ionicons name="arrow-forward" size={18} color="white" />
+                    <Ionicons name="pencil-outline" size={18} color="white" />
+                  </View>
+                  <View style={{ flex: 2, backgroundColor: Colors.creamCard, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 16, marginHorizontal: 6 }}>
+                    <Text style={{ fontSize: 15, color: Colors.text }}>Milk</Text>
+                  </View>
+                  <View style={{ flex: 1 }} />
+                </View>
+                {/* Delete row */}
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View style={{ flex: 1 }} />
+                  <View style={{ flex: 2, backgroundColor: Colors.creamCard, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 16, marginHorizontal: 6 }}>
+                    <Text style={{ fontSize: 15, color: Colors.text }}>Eggs</Text>
+                  </View>
+                  <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', backgroundColor: '#ef4444', borderRadius: 14, paddingVertical: 14, paddingHorizontal: 16, gap: 8 }}>
+                    <Ionicons name="trash-outline" size={18} color="white" />
+                    <Ionicons name="arrow-back" size={18} color="white" />
+                  </View>
+                </View>
+              </View>
+            ) : (
+              <View
+                style={{
+                  width: 108,
+                  height: 108,
+                  borderRadius: 54,
+                  backgroundColor: slide.iconBg,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 44,
+                  shadowColor: Colors.green,
+                  shadowOpacity: 0.15,
+                  shadowRadius: 20,
+                  shadowOffset: { width: 0, height: 8 },
+                  elevation: 4,
+                }}>
+                <Ionicons name={slide.icon} size={48} color={slide.iconColor} />
+              </View>
+            )}
             <Text
               style={{
                 fontFamily: 'CormorantGaramond_500Medium',
