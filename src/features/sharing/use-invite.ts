@@ -1,16 +1,7 @@
 import { useState } from 'react';
-import { Platform } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import Constants from 'expo-constants';
+import * as Linking from 'expo-linking';
 import { supabase } from '@/src/lib/supabase';
-
-function getBaseUrl(): string {
-  if (process.env.EXPO_PUBLIC_APP_URL) return process.env.EXPO_PUBLIC_APP_URL;
-  if (Platform.OS === 'web' && typeof window !== 'undefined') return window.location.origin;
-  const hostUri = Constants.expoConfig?.hostUri;
-  if (hostUri) return `http://${hostUri}`;
-  return 'http://localhost:8081';
-}
 
 export function useCreateInvite() {
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
@@ -42,7 +33,7 @@ export function useCreateInvite() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? `HTTP ${res.status}`);
 
-      setInviteUrl(`${getBaseUrl()}/invite/${data.token}`);
+      setInviteUrl(Linking.createURL(`/invite/${data.token}`));
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
