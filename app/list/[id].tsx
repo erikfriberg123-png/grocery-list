@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from '@/src/components/DraggableList';
 import QRCode from 'react-native-qrcode-svg';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -20,7 +20,6 @@ import { categoryColor } from '@/constants/colors';
 import { useThemeColors } from '@/src/features/theme/use-theme';
 import { soundAdd, soundCheck, soundReorder } from '@/src/lib/sounds';
 import { useList } from '@/src/features/lists/use-lists';
-import { useSaveAsTemplate } from '@/src/features/templates/use-templates';
 import {
   useAddItems,
   useClearChecked,
@@ -29,7 +28,7 @@ import {
   useReorderItem,
   useToggleItem,
 } from '@/src/features/items/use-items';
-import { useShareLink, EXPIRY_OPTIONS } from '@/src/features/sharing/use-share-link';
+import { useCreateInvite } from '@/src/features/sharing/use-invite';
 
 type Item = {
   id: string;
@@ -190,10 +189,10 @@ function ShoppingItemRow({ item, onToggle }: { item: Item; onToggle: () => void 
 }
 
 function ShareSheet({ listId, onClose }: { listId: string; onClose: () => void }) {
-  const { t } = useTranslation();
-  const colors = useThemeColors();
-  const [selectedDays, setSelectedDays] = useState<number | null>(7);
-  const { shareUrl, loading, error, copied, createLink, copyLink } = useShareLink(listId);
+  const { t }    = useTranslation();
+  const colors   = useThemeColors();
+  const nav      = useRouter();
+  const { inviteUrl, loading, error, copied, createInvite, copyLink } = useCreateInvite();
 
   return (
     <Modal visible transparent animationType="slide">
@@ -201,55 +200,51 @@ function ShareSheet({ listId, onClose }: { listId: string; onClose: () => void }
         <Pressable style={{ backgroundColor: colors.cream, borderRadius: 24, padding: 24, paddingBottom: 40 }}>
           <View style={{ width: 36, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: 20 }} />
 
-          <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 22, color: colors.greenDark, marginBottom: 20 }}>
-            {t('share.title')}
+          {/* Import action */}
+          <Pressable
+            onPress={() => { onClose(); nav.push({ pathname: '/import/image', params: { listId } }); }}
+            style={({ pressed }) => ({
+              flexDirection: 'row', alignItems: 'center', gap: 12,
+              paddingVertical: 14, paddingHorizontal: 4, marginBottom: 4,
+              opacity: pressed ? 0.7 : 1,
+            })}>
+            <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: colors.creamCard, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' }}>
+              <Ionicons name="download-outline" size={18} color={colors.greenDark} />
+            </View>
+            <Text style={{ flex: 1, fontSize: 15, fontWeight: '500', color: colors.text }}>{t('list.import')}</Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.muted} />
+          </Pressable>
+
+          <View style={{ height: 1, backgroundColor: colors.border, marginBottom: 20 }} />
+
+          <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 22, color: colors.greenDark, marginBottom: 6 }}>
+            {t('invite.sheet_title')}
+          </Text>
+          <Text style={{ fontSize: 13, color: colors.muted, marginBottom: 20 }}>
+            {t('invite.sheet_subtitle')}
           </Text>
 
-          <Text style={{ fontSize: 12, fontWeight: '700', color: colors.muted, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 }}>
-            {t('share.expiry_label')}
-          </Text>
-          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
-            {EXPIRY_OPTIONS.map((opt) => {
-              const active = selectedDays === opt.days;
-              return (
-                <Pressable
-                  key={String(opt.days)}
-                  onPress={() => setSelectedDays(opt.days)}
-                  style={{
-                    flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: 'center',
-                    borderWidth: active ? 2 : 1,
-                    borderColor: active ? colors.green : colors.border,
-                    backgroundColor: active ? `${colors.green}12` : colors.creamCard,
-                  }}>
-                  <Text style={{ fontSize: 12, fontWeight: active ? '700' : '500', color: active ? colors.green : colors.text }}>
-                    {t(opt.key)}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-
-          {!shareUrl && (
+          {!inviteUrl && (
             <Pressable
               style={{ backgroundColor: colors.green, borderRadius: 14, paddingVertical: 14, alignItems: 'center', marginBottom: 8 }}
-              onPress={() => createLink(selectedDays)}
+              onPress={createInvite}
               disabled={loading}>
               {loading
                 ? <ActivityIndicator color="white" />
-                : <Text style={{ color: 'white', fontWeight: '600', fontSize: 15 }}>{t('share.title')}</Text>}
+                : <Text style={{ color: 'white', fontWeight: '600', fontSize: 15 }}>{t('invite.create')}</Text>}
             </Pressable>
           )}
 
-          {error && (
+          {error ? (
             <Text style={{ color: colors.dangerText, fontSize: 13, textAlign: 'center', marginBottom: 8 }}>{error}</Text>
-          )}
+          ) : null}
 
-          {shareUrl && (
+          {inviteUrl ? (
             <View style={{ alignItems: 'center', gap: 16 }}>
-              <View style={{ backgroundColor: colors.creamCard, padding: 16, borderRadius: 16, borderWidth: 1, borderColor: colors.border }}>
-                <QRCode value={shareUrl} size={180} color={colors.greenDark} backgroundColor={colors.creamCard} />
+              <View style={{ backgroundColor: 'white', padding: 16, borderRadius: 16, borderWidth: 1, borderColor: colors.border }}>
+                <QRCode value={inviteUrl} size={180} color="#1b4332" backgroundColor="white" />
               </View>
-              <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }} numberOfLines={2}>{shareUrl}</Text>
+              <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }} numberOfLines={2}>{inviteUrl}</Text>
               <Pressable
                 style={{ backgroundColor: copied ? colors.greenLight : colors.green, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 32, flexDirection: 'row', alignItems: 'center', gap: 8 }}
                 onPress={copyLink}>
@@ -258,8 +253,11 @@ function ShareSheet({ listId, onClose }: { listId: string; onClose: () => void }
                   {copied ? t('share.copied') : t('share.copy_link')}
                 </Text>
               </Pressable>
+              <Text style={{ fontSize: 11, color: colors.muted, textAlign: 'center' }}>
+                {t('invite.expires_note')}
+              </Text>
             </View>
-          )}
+          ) : null}
         </Pressable>
       </Pressable>
     </Modal>
@@ -278,14 +276,9 @@ export default function ListDetail() {
   const clearChecked = useClearChecked();
   const reorderItem  = useReorderItem();
 
-  const saveAsTemplate = useSaveAsTemplate();
-
   const [input, setInput]             = useState('');
   const [addError, setAddError]       = useState('');
   const [showShare, setShowShare]     = useState(false);
-  const [showSaveTpl, setShowSaveTpl] = useState(false);
-  const [tplName, setTplName]         = useState('');
-  const [tplSaved, setTplSaved]       = useState(false);
   const [shoppingMode, setShoppingMode] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
@@ -430,7 +423,7 @@ export default function ListDetail() {
         />
       </ScaleDecorator>
     );
-  }, [t, id, colors, toggleItem, deleteItem]);
+  }, [t, id, colors, toggleItem, deleteItem, soundCheck]);
 
   // ── Shopping mode ─────────────────────────────────────────────────────────
   if (shoppingMode) {
@@ -551,15 +544,17 @@ export default function ListDetail() {
       keyboardVerticalOffset={0}>
 
       {/* Header */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 8, paddingTop: 52, paddingBottom: 4 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingTop: 52, paddingBottom: 12 }}>
         <Pressable
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 4, padding: 8 }}
+          style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center', padding: 8 }}
           onPress={() => router.canGoBack() ? router.back() : router.replace('/')}>
           <Ionicons name="chevron-back" size={22} color={colors.green} />
-          <Text style={{ color: colors.green, fontSize: 16, fontWeight: '500' }}>{t('list.back')}</Text>
         </Pressable>
+        <Text style={{ flex: 1, textAlign: 'center', fontFamily: 'CormorantGaramond_500Medium', fontSize: 22, color: colors.greenDark }} numberOfLines={1}>
+          {list?.name ?? ''}
+        </Text>
         <Pressable
-          style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.creamCard, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', marginRight: 8 }}
+          style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.creamCard, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' }}
           onPress={() => setShowShare(true)}>
           <Ionicons name="share-outline" size={18} color={colors.greenDark} />
         </Pressable>
@@ -573,17 +568,7 @@ export default function ListDetail() {
         activationDistance={10}
         containerStyle={{ flex: 1 }}
         ListHeaderComponent={
-          <View>
-            {/* Title + remaining count */}
-            <View style={{ paddingHorizontal: 24, paddingTop: 4, paddingBottom: 16 }}>
-              <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 32, color: colors.greenDark }}>
-                {list?.name ?? ''}
-              </Text>
-              <Text style={{ fontSize: 13, color: colors.muted, marginTop: 4 }}>
-                {total - checkedCount} {t('list.remaining')}
-              </Text>
-            </View>
-
+          <View style={{ paddingTop: 4 }}>
             {/* Add item bar */}
             <View style={{ flexDirection: 'row', gap: 8, marginHorizontal: 16, marginBottom: 12 }}>
               <TextInput
@@ -609,22 +594,6 @@ export default function ListDetail() {
             {addError ? (
               <Text style={{ color: colors.dangerText, fontSize: 13, marginHorizontal: 16, marginBottom: 8 }}>{addError}</Text>
             ) : null}
-
-            {/* Quick actions */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 16 }}>
-              {[
-                { icon: 'download-outline' as const, label: t('list.import'), onPress: () => router.push({ pathname: '/import/image', params: { listId: id } }) },
-                { icon: 'bookmark-outline' as const, label: t('template.save_as'), onPress: () => { setTplName(list?.name ?? ''); setTplSaved(false); setShowSaveTpl(true); } },
-              ].map(({ icon, label, onPress }) => (
-                <Pressable
-                  key={label}
-                  style={({ pressed }) => ({ backgroundColor: pressed ? colors.pressedBg : colors.creamCard, borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 6 })}
-                  onPress={onPress}>
-                  <Ionicons name={icon} size={14} color={colors.greenDark} />
-                  <Text style={{ fontSize: 13, fontWeight: '500', color: colors.greenDark }} numberOfLines={1}>{label}</Text>
-                </Pressable>
-              ))}
-            </ScrollView>
 
             {/* Progress bar */}
             {total > 0 && (
@@ -710,52 +679,6 @@ export default function ListDetail() {
 
       {showShare && <ShareSheet listId={id} onClose={() => setShowShare(false)} />}
 
-      {/* Save as template modal */}
-      <Modal visible={showSaveTpl} transparent animationType="slide">
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={{ flex: 1 }}>
-        <Pressable
-          style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}
-          onPress={() => setShowSaveTpl(false)}>
-          <Pressable style={{ backgroundColor: colors.cream, borderRadius: 24, padding: 24, paddingBottom: 40 }}>
-            <View style={{ width: 36, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: 16 }} />
-            <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 22, color: colors.greenDark, marginBottom: 16 }}>
-              {t('template.save_as')}
-            </Text>
-            {tplSaved ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 16 }}>
-                <Ionicons name="checkmark-circle" size={24} color={colors.green} />
-                <Text style={{ fontSize: 16, color: colors.green, fontWeight: '600' }}>{t('template.saved')}</Text>
-              </View>
-            ) : (
-              <>
-                <TextInput
-                  style={{ backgroundColor: colors.creamCard, borderWidth: 1, borderColor: colors.border, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14, fontSize: 16, color: colors.text, marginBottom: 16 }}
-                  placeholder={t('template.template_name')}
-                  placeholderTextColor={colors.muted}
-                  value={tplName}
-                  onChangeText={setTplName}
-                  autoFocus
-                />
-                <Pressable
-                  style={{ backgroundColor: tplName.trim() ? colors.green : colors.border, borderRadius: 14, paddingVertical: 16, alignItems: 'center' }}
-                  disabled={!tplName.trim() || saveAsTemplate.isPending}
-                  onPress={async () => {
-                    await saveAsTemplate.mutateAsync({ listId: id, name: tplName });
-                    setTplSaved(true);
-                    setTimeout(() => setShowSaveTpl(false), 1200);
-                  }}>
-                  {saveAsTemplate.isPending
-                    ? <ActivityIndicator color="white" />
-                    : <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>{t('common.save')}</Text>}
-                </Pressable>
-              </>
-            )}
-          </Pressable>
-        </Pressable>
-        </KeyboardAvoidingView>
-      </Modal>
     </KeyboardAvoidingView>
   );
 }

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Dimensions,
+  Image,
   KeyboardAvoidingView,
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -166,9 +167,7 @@ function AuthStep({ onBack }: { onBack: () => void }) {
 
         {/* App logo */}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 36 }}>
-          <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: Colors.green, alignItems: 'center', justifyContent: 'center' }}>
-            <Ionicons name="leaf" size={22} color="white" />
-          </View>
+          <Image source={require('@/assets/images/logo-light.png')} style={{ width: 44, height: 44, borderRadius: 12 }} />
           <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 28, color: Colors.greenDark }}>
             Lista
           </Text>

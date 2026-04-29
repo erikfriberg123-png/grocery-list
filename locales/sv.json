@@ -77,6 +77,16 @@
     "permission_edit": "Kan redigera",
     "revoke": "Återkalla länk"
   },
+  "invite": {
+    "title": "Du är inbjuden!",
+    "subtitle": "Gå med i familjehushållet och dela inköpslistor och måltidsplanerare.",
+    "join": "Gå med i hushållet",
+    "joined": "Du är med!",
+    "sheet_title": "Bjud in familjen",
+    "sheet_subtitle": "Vem som helst med den här länken kan registrera sig och gå med i ditt hushåll.",
+    "create": "Skapa inbjudningslänk",
+    "expires_note": "Länken gäller i 7 dagar"
+  },
   "guest": {
     "viewing_list": "Visar delad lista",
     "sign_up_prompt": "Skapa konto för att göra egna listor"
@@ -164,6 +174,21 @@
     "next": "Nästa",
     "get_started": "Kom igång",
     "skip": "Hoppa över"
+  },
+  "plan": {
+    "title": "Måltidsplan",
+    "week": "Vecka {{n}}",
+    "add_dinner": "+ Lägg till middag",
+    "pick_recipe": "Välj ett recept",
+    "search_recipes": "Sök recept…",
+    "meal_placeholder": "t.ex. Pasta Bolognese",
+    "remove": "Ta bort",
+    "no_recipes": "Inga sparade recept ännu",
+    "random_pick": "Snurra hjulet",
+    "random_title": "Vad ska vi äta?",
+    "random_spin": "Snurra!",
+    "random_spinning": "Snurrar…",
+    "random_result": "Kvällens middag"
   },
   "import": {
     "title": "Importera",

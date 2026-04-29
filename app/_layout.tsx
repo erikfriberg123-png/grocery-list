@@ -9,6 +9,7 @@ import { useRouter, useSegments, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { supabase } from '@/src/lib/supabase';
@@ -16,7 +17,32 @@ import { useAuthStore } from '@/src/features/auth/store';
 import { queryClient } from '@/src/lib/query-client';
 import { useThemeStore } from '@/src/features/theme/use-theme';
 
-SplashScreen.preventAutoHideAsync();
+// SplashScreen is native-only; on web it throws if called
+if (Platform.OS !== 'web') {
+  SplashScreen.preventAutoHideAsync();
+}
+
+async function acceptPendingInvite(accessToken: string) {
+  const token = await AsyncStorage.getItem('pending_invite');
+  if (!token) return;
+  await AsyncStorage.removeItem('pending_invite');
+  const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
+  const anonKey     = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
+  try {
+    await fetch(`${supabaseUrl}/functions/v1/accept-invite`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+        'apikey': anonKey,
+      },
+      body: JSON.stringify({ token }),
+    });
+    queryClient.invalidateQueries();
+  } catch (e) {
+    console.warn('auto-accept invite failed:', e);
+  }
+}
 
 function AuthGate() {
   const { session, initialized, onboardingDone, setSession, setInitialized, setOnboardingDone } = useAuthStore();
@@ -40,15 +66,22 @@ function AuthGate() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Auto-accept a pending invite whenever a session becomes available
+  useEffect(() => {
+    if (session?.access_token) {
+      acceptPendingInvite(session.access_token);
+    }
+  }, [session?.access_token]);
+
   useEffect(() => {
     if (!initialized || onboardingDone === null) return;
-    const inAuthGroup = segments[0] === '(auth)';
+    const inAuthGroup  = segments[0] === '(auth)';
     const inOnboarding = segments[0] === 'onboarding';
-    const inTabs = segments[0] === '(tabs)';
+    const inTabs       = segments[0] === '(tabs)';
+    const inInvite     = (segments[0] as string) === 'invite';
 
     if (session) {
       if (!onboardingDone) {
-        // Logged in without seeing onboarding — complete silently
         AsyncStorage.setItem('onboarding_complete', 'true');
         setOnboardingDone(true);
         if (!inTabs) router.replace('/(tabs)');
@@ -56,11 +89,11 @@ function AuthGate() {
         if (inAuthGroup || inOnboarding) router.replace('/(tabs)');
       }
     } else {
+      // Invite links are public — show the invite page without redirecting
+      if (inInvite) return;
       if (onboardingDone) {
-        // Returning user who logged out — go straight to sign-in
         if (!inAuthGroup) router.replace('/(auth)/sign-in');
       } else {
-        // New user — go through onboarding (login is the last step)
         if (!inOnboarding) router.replace('/onboarding');
       }
     }
@@ -74,23 +107,21 @@ export default function RootLayout() {
   const isDark = useThemeStore((s) => s.mode === 'dark');
 
   useEffect(() => {
-    if (fontsLoaded) SplashScreen.hideAsync();
+    if (fontsLoaded && Platform.OS !== 'web') SplashScreen.hideAsync();
   }, [fontsLoaded]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
         <AuthGate />
-        {fontsLoaded ? (
-          <Stack>
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="list/[id]" options={{ headerShown: false }} />
-            <Stack.Screen name="guest/[token]" options={{ headerShown: false }} />
-            <Stack.Screen name="import" options={{ headerShown: false }} />
-            <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
-          </Stack>
-        ) : null}
+        <Stack>
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="list/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="invite/[token]" options={{ headerShown: false }} />
+          <Stack.Screen name="import" options={{ headerShown: false }} />
+          <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
+        </Stack>
         <StatusBar style={isDark ? 'light' : 'dark'} />
       </QueryClientProvider>
     </GestureHandlerRootView>

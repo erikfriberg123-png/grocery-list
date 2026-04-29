@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Platform } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+import Constants from 'expo-constants';
 import { supabase } from '@/src/lib/supabase';
 
 export type ExpiryOption = { key: string; days: number | null };
@@ -13,10 +14,17 @@ export const EXPIRY_OPTIONS: ExpiryOption[] = [
 ];
 
 function getBaseUrl(): string {
+  // Production — set EXPO_PUBLIC_APP_URL to your deployed domain
+  if (process.env.EXPO_PUBLIC_APP_URL) {
+    return process.env.EXPO_PUBLIC_APP_URL;
+  }
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
     return window.location.origin;
   }
-  // For native, use the web URL (configure via env in production)
+  // Development on device — use the Metro server's LAN address so the link
+  // works for anyone on the same WiFi (hostUri looks like "192.168.x.x:8081")
+  const hostUri = Constants.expoConfig?.hostUri;
+  if (hostUri) return `http://${hostUri}`;
   return 'http://localhost:8081';
 }
 

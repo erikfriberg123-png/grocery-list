@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
+import ReanimatedSwipeable, { type SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import * as ImagePicker from 'expo-image-picker';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -98,73 +99,88 @@ function RecipeImage({ uri, categoryKey }: { uri: string | null; categoryKey: Re
 }
 
 function RecipeCard({ recipe, onEdit, onDelete }: { recipe: Recipe; onEdit: () => void; onDelete: () => void }) {
-  const { t } = useTranslation();
-  const colors = useThemeColors();
+  const { t }    = useTranslation();
+  const colors   = useThemeColors();
+  const swipeRef = useRef<SwipeableMethods | null>(null);
   const imageUri = recipeImageUrl(recipe.image_path);
 
+  const renderLeftActions = (_: unknown, __: unknown, methods: SwipeableMethods) => (
+    <Pressable
+      onPress={() => { methods.close(); onEdit(); }}
+      style={{
+        width: 80, marginRight: 8, marginBottom: 10,
+        borderRadius: 16, backgroundColor: colors.green,
+        alignItems: 'center', justifyContent: 'center', gap: 4,
+      }}>
+      <Ionicons name="pencil" size={20} color="white" />
+      <Text style={{ fontSize: 11, fontWeight: '700', color: 'white', letterSpacing: 0.3 }}>
+        {t('recipe.edit')}
+      </Text>
+    </Pressable>
+  );
+
+  const renderRightActions = (_: unknown, __: unknown, methods: SwipeableMethods) => (
+    <Pressable
+      onPress={() => { methods.close(); onDelete(); }}
+      style={{
+        width: 80, marginLeft: 8, marginBottom: 10,
+        borderRadius: 16, backgroundColor: colors.dangerText,
+        alignItems: 'center', justifyContent: 'center', gap: 4,
+      }}>
+      <Ionicons name="trash" size={20} color="white" />
+      <Text style={{ fontSize: 11, fontWeight: '700', color: 'white', letterSpacing: 0.3 }}>
+        {t('common.delete')}
+      </Text>
+    </Pressable>
+  );
+
   return (
-    <View style={{
-      backgroundColor: colors.creamCard,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: colors.border,
-      padding: 12,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
-      marginBottom: 10,
-    }}>
-      <RecipeImage uri={imageUri} categoryKey={recipe.category} />
+    <ReanimatedSwipeable
+      ref={swipeRef}
+      friction={2}
+      leftThreshold={60}
+      rightThreshold={60}
+      overshootLeft={false}
+      overshootRight={false}
+      renderLeftActions={renderLeftActions}
+      renderRightActions={renderRightActions}
+      containerStyle={{ marginHorizontal: 16, marginBottom: 10 }}>
+      <View style={{
+        backgroundColor: colors.creamCard,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: colors.border,
+        padding: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+      }}>
+        <RecipeImage uri={imageUri} categoryKey={recipe.category} />
 
-      <View style={{ flex: 1, gap: 4 }}>
-        <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }} numberOfLines={2}>
-          {recipe.name}
-        </Text>
-        {recipe.note ? (
-          <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }} numberOfLines={2}>
-            {recipe.note}
+        <View style={{ flex: 1, gap: 4 }}>
+          <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }} numberOfLines={2}>
+            {recipe.name}
           </Text>
-        ) : null}
-
-        <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
+          {recipe.note ? (
+            <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }} numberOfLines={2}>
+              {recipe.note}
+            </Text>
+          ) : null}
           {recipe.url ? (
             <Pressable
               onPress={() => Linking.openURL(recipe.url!)}
               style={({ pressed }) => ({
-                flexDirection: 'row', alignItems: 'center', gap: 4,
+                flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start',
                 backgroundColor: pressed ? colors.greenLight : colors.green,
-                paddingHorizontal: 12, paddingVertical: 7, borderRadius: 10,
+                paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10, marginTop: 4,
               })}>
               <Ionicons name="open-outline" size={13} color="white" />
               <Text style={{ fontSize: 12, fontWeight: '700', color: 'white' }}>{t('recipe.open')}</Text>
             </Pressable>
           ) : null}
-
-          <Pressable
-            onPress={onEdit}
-            style={({ pressed }) => ({
-              flexDirection: 'row', alignItems: 'center', gap: 4,
-              backgroundColor: pressed ? colors.pressedBg : colors.creamCard,
-              borderWidth: 1, borderColor: colors.border,
-              paddingHorizontal: 12, paddingVertical: 7, borderRadius: 10,
-            })}>
-            <Ionicons name="pencil-outline" size={13} color={colors.greenDark} />
-            <Text style={{ fontSize: 12, fontWeight: '700', color: colors.greenDark }}>{t('recipe.edit')}</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={onDelete}
-            style={({ pressed }) => ({
-              flexDirection: 'row', alignItems: 'center', gap: 4,
-              backgroundColor: pressed ? colors.dangerBg : colors.creamCard,
-              borderWidth: 1, borderColor: pressed ? colors.dangerBorder : colors.border,
-              paddingHorizontal: 10, paddingVertical: 7, borderRadius: 10,
-            })}>
-            <Ionicons name="trash-outline" size={13} color={colors.dangerText} />
-          </Pressable>
         </View>
       </View>
-    </View>
+    </ReanimatedSwipeable>
   );
 }
 
@@ -586,7 +602,7 @@ export default function RecipesScreen() {
         <View style={{ height: 1, backgroundColor: colors.border, marginHorizontal: 16, marginVertical: 16 }} />
 
         {/* Recipe list */}
-        <View style={{ paddingHorizontal: 16 }}>
+        <View>
           {isLoading ? (
             <ActivityIndicator color={colors.green} style={{ marginTop: 32 }} />
           ) : filtered.length === 0 ? (

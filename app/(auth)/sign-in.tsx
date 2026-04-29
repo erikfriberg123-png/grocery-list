@@ -5,6 +5,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -13,7 +14,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { z } from 'zod';
 
 import { Colors } from '@/constants/colors';
@@ -65,21 +65,7 @@ export default function SignIn() {
 
         {/* Logo */}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 48 }}>
-          <View style={{
-            width: 48,
-            height: 48,
-            borderRadius: 14,
-            backgroundColor: Colors.green,
-            alignItems: 'center',
-            justifyContent: 'center',
-            shadowColor: Colors.green,
-            shadowOpacity: 0.25,
-            shadowRadius: 8,
-            shadowOffset: { width: 0, height: 4 },
-            elevation: 4,
-          }}>
-            <Ionicons name="leaf" size={24} color="white" />
-          </View>
+          <Image source={require('@/assets/images/logo-light.png')} style={{ width: 48, height: 48, borderRadius: 14 }} />
           <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 30, color: Colors.greenDark }}>
             Lista
           </Text>

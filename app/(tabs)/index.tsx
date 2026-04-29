@@ -223,26 +223,11 @@ export default function ListsScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.cream }}>
       {/* Header */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingTop: 56, paddingBottom: 4 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <View style={{ width: 36, height: 36, backgroundColor: colors.green, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}>
-            <Ionicons name="leaf" size={18} color="white" />
-          </View>
-          <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 20, color: colors.greenDark }}>Lista</Text>
-        </View>
-        <Pressable
-          style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.creamCard, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' }}
-          onPress={() => router.push('/household')}>
-          <Ionicons name="settings-outline" size={18} color={colors.greenDark} />
-        </Pressable>
-      </View>
-
-      {/* Page title */}
-      <View style={{ paddingHorizontal: 24, paddingTop: 8, paddingBottom: 20 }}>
-        <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 36, color: colors.greenDark, lineHeight: 40 }}>
+      <View style={{ paddingHorizontal: 24, paddingTop: 56, paddingBottom: 16 }}>
+        <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 34, color: colors.greenDark, lineHeight: 40 }}>
           {t('list.title')}
         </Text>
-        <Text style={{ fontSize: 14, color: colors.muted, marginTop: 4 }}>
+        <Text style={{ fontSize: 13, color: colors.muted, marginTop: 4 }}>
           {t('list.active_count', { count: activeCount })}
         </Text>
       </View>

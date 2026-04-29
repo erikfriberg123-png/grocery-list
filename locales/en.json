@@ -77,6 +77,16 @@
     "permission_edit": "Can edit",
     "revoke": "Revoke link"
   },
+  "invite": {
+    "title": "You're invited!",
+    "subtitle": "Join the family household to share shopping lists and meal plans together.",
+    "join": "Join household",
+    "joined": "You've joined!",
+    "sheet_title": "Invite family",
+    "sheet_subtitle": "Anyone with this link can sign up and join your household.",
+    "create": "Create invite link",
+    "expires_note": "Link expires in 7 days"
+  },
   "guest": {
     "viewing_list": "Viewing shared list",
     "sign_up_prompt": "Sign up to create your own lists"
@@ -164,6 +174,21 @@
     "next": "Next",
     "get_started": "Get started",
     "skip": "Skip"
+  },
+  "plan": {
+    "title": "Meal Plan",
+    "week": "Week {{n}}",
+    "add_dinner": "+ Add dinner",
+    "pick_recipe": "Pick a recipe",
+    "search_recipes": "Search recipes…",
+    "meal_placeholder": "e.g. Pasta Bolognese",
+    "remove": "Remove",
+    "no_recipes": "No saved recipes yet",
+    "random_pick": "Spin the wheel",
+    "random_title": "What's for dinner?",
+    "random_spin": "Spin!",
+    "random_spinning": "Spinning…",
+    "random_result": "Tonight's dinner"
   },
   "import": {
     "title": "Import",
