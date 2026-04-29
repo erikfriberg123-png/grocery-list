@@ -3,11 +3,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/src/lib/supabase';
 import { useAuthStore } from '@/src/features/auth/store';
 
-// The recipes table is added by migration 20260429000000_recipes.sql.
-// Until types are regenerated after migration, cast to avoid stale-type errors.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const db = supabase as any;
-
 export type RecipeCategory =
   | 'meat' | 'fish' | 'salads' | 'pasta'
   | 'vegetarian' | 'soups' | 'desserts' | 'other';
@@ -89,7 +84,7 @@ export function useRecipes() {
   return useQuery({
     queryKey: ['recipes'],
     queryFn: async () => {
-      const { data, error } = await db
+      const { data, error } = await supabase
         .from('recipes')
         .select('*')
         .order('created_at', { ascending: false });
@@ -141,10 +136,10 @@ export function useUpsertRecipe() {
       };
 
       if (id) {
-        const { error } = await db.from('recipes').update(row).eq('id', id);
+        const { error } = await supabase.from('recipes').update(row).eq('id', id);
         if (error) throw error;
       } else {
-        const { error } = await db.from('recipes').insert(row);
+        const { error } = await supabase.from('recipes').insert(row);
         if (error) throw error;
       }
     },
@@ -160,7 +155,7 @@ export function useDeleteRecipe() {
       if (imagePath) {
         await supabase.storage.from('recipe-images').remove([imagePath]);
       }
-      const { error } = await db.from('recipes').delete().eq('id', id);
+      const { error } = await supabase.from('recipes').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recipes'] }),
