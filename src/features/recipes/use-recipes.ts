@@ -48,20 +48,23 @@ async function uploadImage(
   localUri: string,
   existingPath: string | null,
 ): Promise<string> {
-  // Delete old image if path changed
   if (existingPath) {
     await supabase.storage.from('recipe-images').remove([existingPath]);
   }
 
-  const ext  = localUri.split('.').pop()?.toLowerCase() ?? 'jpg';
-  const path = `${householdId}/${Date.now()}.${ext}`;
+  // Strip query params before extracting extension (common on iOS ph:// URIs)
+  const cleanUri = localUri.split('?')[0];
+  const rawExt   = cleanUri.split('.').pop()?.toLowerCase() ?? 'jpg';
+  const ext      = ['jpg', 'jpeg', 'png', 'webp', 'heic'].includes(rawExt) ? rawExt : 'jpg';
+  const mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
+  const path     = `${householdId}/${Date.now()}.${ext}`;
 
-  const response = await fetch(localUri);
-  const blob     = await response.blob();
+  // arrayBuffer() works correctly for file:// URIs on React Native; blob() does not.
+  const arrayBuffer = await fetch(localUri).then((r) => r.arrayBuffer());
 
   const { error } = await supabase.storage
     .from('recipe-images')
-    .upload(path, blob, { contentType: `image/${ext === 'jpg' ? 'jpeg' : ext}`, upsert: false });
+    .upload(path, arrayBuffer, { contentType: mimeType, upsert: false });
 
   if (error) throw error;
   return path;
