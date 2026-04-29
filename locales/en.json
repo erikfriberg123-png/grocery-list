@@ -51,7 +51,9 @@
     "active_count": "{{count}} active",
     "import": "Import",
     "clear_checked": "Clear checked",
-    "shopping_mode": "Shopping mode"
+    "shopping_mode": "Shopping mode",
+    "delete": "Delete list",
+    "delete_confirm": "This will permanently delete the list and all its items."
   },
   "item": {
     "quantity": "Quantity",
@@ -102,8 +104,41 @@
     "pharmacy": "Pharmacy",
     "other": "Other"
   },
+  "recipe": {
+    "title": "My recipes",
+    "subtitle": "Save recipe links, add pictures, and browse by food folder.",
+    "search": "Search recipes…",
+    "show_all": "All",
+    "add": "+ Add recipe",
+    "add_title": "Add recipe",
+    "edit_title": "Edit recipe",
+    "name": "Recipe name",
+    "url": "Recipe URL (optional)",
+    "image_url": "Image URL (optional)",
+    "note": "Notes (optional)",
+    "open": "Open",
+    "edit": "Edit",
+    "no_recipes": "No recipes yet — add your first one below.",
+    "no_results": "No recipes match your search.",
+    "photo": "Photo",
+    "change_photo": "Change photo",
+    "remove_photo": "Remove",
+    "upload_photo": "Upload photo from library"
+  },
+  "recipe_category": {
+    "meat": "Meat",
+    "fish": "Fish",
+    "salads": "Salads",
+    "pasta": "Pasta",
+    "vegetarian": "Vegetarian",
+    "soups": "Soups",
+    "desserts": "Desserts",
+    "other": "Other",
+    "all": "All"
+  },
   "template": {
     "save_as": "Save as template",
+    "label": "Template",
     "template_name": "Template name",
     "saved": "Saved as template!",
     "from_template": "From template",
@@ -115,6 +150,8 @@
   "settings": {
     "title": "Household",
     "language": "Language",
+    "appearance": "Appearance",
+    "dark_mode": "Dark mode",
     "sign_out": "Sign out"
   },
   "onboarding": {

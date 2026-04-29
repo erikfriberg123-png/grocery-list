@@ -16,7 +16,8 @@ import {
   View,
 } from 'react-native';
 
-import { Colors, categoryColor } from '@/constants/colors';
+import { categoryColor } from '@/constants/colors';
+import { useThemeColors } from '@/src/features/theme/use-theme';
 import { soundAdd, soundCheck, soundReorder } from '@/src/lib/sounds';
 import { useList } from '@/src/features/lists/use-lists';
 import { useSaveAsTemplate } from '@/src/features/templates/use-templates';
@@ -59,13 +60,14 @@ function ItemCard({ item, onToggle, onDelete, drag, isActive }: {
   drag: () => void;
   isActive: boolean;
 }) {
+  const colors = useThemeColors();
   const checked = item.status === 'checked';
   return (
     <Pressable
       onLongPress={!checked ? drag : undefined}
       delayLongPress={150}
       style={({ pressed }) => ({
-        backgroundColor: Colors.creamCard,
+        backgroundColor: colors.creamCard,
         marginHorizontal: 16,
         marginBottom: 8,
         borderRadius: 14,
@@ -74,13 +76,11 @@ function ItemCard({ item, onToggle, onDelete, drag, isActive }: {
         alignItems: 'center',
         gap: 12,
         borderWidth: 1,
-        borderColor: isActive ? Colors.green : 'transparent',
+        borderColor: isActive ? colors.green : 'transparent',
         opacity: checked ? 0.5 : (pressed ? 0.85 : 1),
         elevation: isActive ? 4 : 0,
       })}>
 
-      {/* Checkbox — the only element that toggles; its own Pressable so it
-          doesn't bleed into the row's long-press drag area */}
       <Pressable
         onPress={onToggle}
         onLongPress={() => {}}
@@ -89,8 +89,8 @@ function ItemCard({ item, onToggle, onDelete, drag, isActive }: {
         style={{
           width: 24, height: 24, borderRadius: 12,
           borderWidth: 2,
-          borderColor: checked ? Colors.green : '#d4cfc1',
-          backgroundColor: checked ? Colors.green : 'transparent',
+          borderColor: checked ? colors.green : colors.checkBorder,
+          backgroundColor: checked ? colors.green : 'transparent',
           alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
         }}>
@@ -99,11 +99,11 @@ function ItemCard({ item, onToggle, onDelete, drag, isActive }: {
 
       <View style={{ flex: 1 }}>
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
-          <Text style={{ fontSize: 16, fontWeight: '600', color: Colors.text, textDecorationLine: checked ? 'line-through' : 'none' }}>
+          <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text, textDecorationLine: checked ? 'line-through' : 'none' }}>
             {item.name}
           </Text>
           {(item.quantity || item.unit) && (
-            <Text style={{ fontSize: 13, color: Colors.muted }}>
+            <Text style={{ fontSize: 13, color: colors.muted }}>
               {[item.quantity, item.unit].filter(Boolean).join(' ')}
             </Text>
           )}
@@ -115,37 +115,39 @@ function ItemCard({ item, onToggle, onDelete, drag, isActive }: {
           onPress={onDelete}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={{ padding: 4 }}>
-          <Ionicons name="trash-outline" size={16} color={Colors.muted} />
+          <Ionicons name="trash-outline" size={16} color={colors.muted} />
         </Pressable>
       ) : (
         <View style={{ padding: 4 }}>
-          <Ionicons name="reorder-three-outline" size={22} color="#d4cfc1" />
+          <Ionicons name="reorder-three-outline" size={22} color={colors.checkBorder} />
         </View>
       )}
     </Pressable>
   );
 }
 
-function CategoryHeader({ category, count }: { category: string; count: number }) {
+function CategoryHeader({ category: cat, count }: { category: string; count: number }) {
   const { t } = useTranslation();
-  const color = categoryColor(category);
-  const label = t(`category.${category}`, { defaultValue: category });
+  const colors = useThemeColors();
+  const color = categoryColor(cat);
+  const label = t(`category.${cat}`, { defaultValue: cat });
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 8 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: color }} />
-        <Text style={{ fontSize: 12, fontWeight: '700', color: Colors.text, letterSpacing: 1, textTransform: 'uppercase' }}>
+        <Text style={{ fontSize: 12, fontWeight: '700', color: colors.text, letterSpacing: 1, textTransform: 'uppercase' }}>
           {label}
         </Text>
       </View>
       {count > 0 && (
-        <Text style={{ fontSize: 12, color: Colors.muted, fontWeight: '500' }}>{count}</Text>
+        <Text style={{ fontSize: 12, color: colors.muted, fontWeight: '500' }}>{count}</Text>
       )}
     </View>
   );
 }
 
 function ShoppingItemRow({ item, onToggle }: { item: Item; onToggle: () => void }) {
+  const colors = useThemeColors();
   const checked = item.status === 'checked';
   return (
     <Pressable
@@ -156,13 +158,13 @@ function ShoppingItemRow({ item, onToggle }: { item: Item; onToggle: () => void 
         gap: 14,
         paddingVertical: 15,
         paddingHorizontal: 20,
-        backgroundColor: pressed ? '#f5f1e8' : 'transparent',
+        backgroundColor: pressed ? colors.pressedBg : 'transparent',
       })}>
       <View style={{
         width: 28, height: 28, borderRadius: 14,
         borderWidth: 2,
-        borderColor: checked ? Colors.green : '#d4cfc1',
-        backgroundColor: checked ? Colors.green : 'transparent',
+        borderColor: checked ? colors.green : colors.checkBorder,
+        backgroundColor: checked ? colors.green : 'transparent',
         alignItems: 'center', justifyContent: 'center',
         flexShrink: 0,
       }}>
@@ -172,13 +174,13 @@ function ShoppingItemRow({ item, onToggle }: { item: Item; onToggle: () => void 
         <Text style={{
           fontSize: 17,
           fontWeight: '500',
-          color: checked ? Colors.muted : Colors.text,
+          color: checked ? colors.muted : colors.text,
           textDecorationLine: checked ? 'line-through' : 'none',
         }}>
           {item.name}
         </Text>
         {(item.quantity || item.unit) && (
-          <Text style={{ fontSize: 13, color: Colors.muted, marginTop: 1 }}>
+          <Text style={{ fontSize: 13, color: colors.muted, marginTop: 1 }}>
             {[item.quantity, item.unit].filter(Boolean).join(' ')}
           </Text>
         )}
@@ -189,20 +191,21 @@ function ShoppingItemRow({ item, onToggle }: { item: Item; onToggle: () => void 
 
 function ShareSheet({ listId, onClose }: { listId: string; onClose: () => void }) {
   const { t } = useTranslation();
+  const colors = useThemeColors();
   const [selectedDays, setSelectedDays] = useState<number | null>(7);
   const { shareUrl, loading, error, copied, createLink, copyLink } = useShareLink(listId);
 
   return (
     <Modal visible transparent animationType="slide">
-      <Pressable style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }} onPress={onClose}>
-        <Pressable style={{ backgroundColor: Colors.cream, borderRadius: 24, padding: 24, paddingBottom: 40 }}>
-          <View style={{ width: 36, height: 4, backgroundColor: Colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: 20 }} />
+      <Pressable style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }} onPress={onClose}>
+        <Pressable style={{ backgroundColor: colors.cream, borderRadius: 24, padding: 24, paddingBottom: 40 }}>
+          <View style={{ width: 36, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: 20 }} />
 
-          <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 22, color: Colors.greenDark, marginBottom: 20 }}>
+          <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 22, color: colors.greenDark, marginBottom: 20 }}>
             {t('share.title')}
           </Text>
 
-          <Text style={{ fontSize: 12, fontWeight: '700', color: Colors.muted, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 }}>
+          <Text style={{ fontSize: 12, fontWeight: '700', color: colors.muted, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 }}>
             {t('share.expiry_label')}
           </Text>
           <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
@@ -215,10 +218,10 @@ function ShareSheet({ listId, onClose }: { listId: string; onClose: () => void }
                   style={{
                     flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: 'center',
                     borderWidth: active ? 2 : 1,
-                    borderColor: active ? Colors.green : Colors.border,
-                    backgroundColor: active ? `${Colors.green}12` : Colors.creamCard,
+                    borderColor: active ? colors.green : colors.border,
+                    backgroundColor: active ? `${colors.green}12` : colors.creamCard,
                   }}>
-                  <Text style={{ fontSize: 12, fontWeight: active ? '700' : '500', color: active ? Colors.green : Colors.text }}>
+                  <Text style={{ fontSize: 12, fontWeight: active ? '700' : '500', color: active ? colors.green : colors.text }}>
                     {t(opt.key)}
                   </Text>
                 </Pressable>
@@ -228,7 +231,7 @@ function ShareSheet({ listId, onClose }: { listId: string; onClose: () => void }
 
           {!shareUrl && (
             <Pressable
-              style={{ backgroundColor: Colors.green, borderRadius: 14, paddingVertical: 14, alignItems: 'center', marginBottom: 8 }}
+              style={{ backgroundColor: colors.green, borderRadius: 14, paddingVertical: 14, alignItems: 'center', marginBottom: 8 }}
               onPress={() => createLink(selectedDays)}
               disabled={loading}>
               {loading
@@ -238,20 +241,20 @@ function ShareSheet({ listId, onClose }: { listId: string; onClose: () => void }
           )}
 
           {error && (
-            <Text style={{ color: '#c0392b', fontSize: 13, textAlign: 'center', marginBottom: 8 }}>{error}</Text>
+            <Text style={{ color: colors.dangerText, fontSize: 13, textAlign: 'center', marginBottom: 8 }}>{error}</Text>
           )}
 
           {shareUrl && (
             <View style={{ alignItems: 'center', gap: 16 }}>
-              <View style={{ backgroundColor: 'white', padding: 16, borderRadius: 16, borderWidth: 1, borderColor: Colors.border }}>
-                <QRCode value={shareUrl} size={180} color={Colors.greenDark} backgroundColor="white" />
+              <View style={{ backgroundColor: colors.creamCard, padding: 16, borderRadius: 16, borderWidth: 1, borderColor: colors.border }}>
+                <QRCode value={shareUrl} size={180} color={colors.greenDark} backgroundColor={colors.creamCard} />
               </View>
-              <Text style={{ fontSize: 12, color: Colors.muted, textAlign: 'center' }} numberOfLines={2}>{shareUrl}</Text>
+              <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }} numberOfLines={2}>{shareUrl}</Text>
               <Pressable
-                style={{ backgroundColor: copied ? Colors.greenLight : Colors.green, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 32, flexDirection: 'row', alignItems: 'center', gap: 8 }}
+                style={{ backgroundColor: copied ? colors.greenLight : colors.green, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 32, flexDirection: 'row', alignItems: 'center', gap: 8 }}
                 onPress={copyLink}>
-                <Ionicons name={copied ? 'checkmark' : 'copy-outline'} size={16} color={copied ? Colors.greenDark : 'white'} />
-                <Text style={{ color: copied ? Colors.greenDark : 'white', fontWeight: '600', fontSize: 15 }}>
+                <Ionicons name={copied ? 'checkmark' : 'copy-outline'} size={16} color={copied ? colors.greenDark : 'white'} />
+                <Text style={{ color: copied ? colors.greenDark : 'white', fontWeight: '600', fontSize: 15 }}>
                   {copied ? t('share.copied') : t('share.copy_link')}
                 </Text>
               </Pressable>
@@ -266,8 +269,9 @@ function ShareSheet({ listId, onClose }: { listId: string; onClose: () => void }
 export default function ListDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
+  const colors = useThemeColors();
   const { data: list } = useList(id);
-  const { data: items, isLoading } = useItems(id);
+  const { data: items, isLoading, error: itemsError } = useItems(id);
   const addItems     = useAddItems();
   const toggleItem   = useToggleItem();
   const deleteItem   = useDeleteItem();
@@ -305,7 +309,6 @@ export default function ListDetail() {
   const checkedCount = checked.length;
   const progressPct  = total === 0 ? 0 : Math.round((checkedCount / total) * 100);
 
-  // Group all items by category for shopping mode
   const shoppingGroups = useMemo(() => {
     return (items ?? []).reduce<Record<string, Item[]>>((acc, item) => {
       const key = item.category ?? 'other';
@@ -315,7 +318,6 @@ export default function ListDetail() {
     }, {});
   }, [items]);
 
-  // Only categories that have at least one item
   const shoppingCategories = useMemo(() => {
     return [...CATEGORY_ORDER, 'other'].filter(
       (cat) => (shoppingGroups[cat]?.length ?? 0) > 0,
@@ -334,6 +336,7 @@ export default function ListDetail() {
 
     for (const cat of CATEGORY_ORDER) {
       const catItems = groups[cat] ?? [];
+      if (catItems.length === 0) continue;
       rows.push({ type: 'header', category: cat, count: catItems.length });
       for (const item of catItems) rows.push({ type: 'item', item });
     }
@@ -406,7 +409,7 @@ export default function ListDetail() {
     if (row.type === 'checked_header') {
       return (
         <View style={{ paddingHorizontal: 24, paddingVertical: 8 }}>
-          <Text style={{ fontSize: 12, fontWeight: '700', color: Colors.muted, letterSpacing: 1, textTransform: 'uppercase' }}>
+          <Text style={{ fontSize: 12, fontWeight: '700', color: colors.muted, letterSpacing: 1, textTransform: 'uppercase' }}>
             {t('list.checked_items')}
           </Text>
         </View>
@@ -427,42 +430,41 @@ export default function ListDetail() {
         />
       </ScaleDecorator>
     );
-  }, [t, id, toggleItem, deleteItem]);
+  }, [t, id, colors, toggleItem, deleteItem]);
 
   // ── Shopping mode ─────────────────────────────────────────────────────────
   if (shoppingMode) {
     const donePct = total === 0 ? 0 : Math.round((checkedCount / total) * 100);
 
     return (
-      <View style={{ flex: 1, backgroundColor: Colors.cream }}>
-        {/* Header */}
+      <View style={{ flex: 1, backgroundColor: colors.cream }}>
         <View style={{
           paddingHorizontal: 20,
           paddingTop: 54,
           paddingBottom: 14,
           borderBottomWidth: 1,
-          borderBottomColor: Colors.border,
-          backgroundColor: Colors.cream,
+          borderBottomColor: colors.border,
+          backgroundColor: colors.cream,
         }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <Pressable
               onPress={() => setShoppingMode(false)}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 20, backgroundColor: Colors.creamCard, borderWidth: 1, borderColor: Colors.border }}>
-              <Ionicons name="close" size={20} color={Colors.greenDark} />
+              style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 20, backgroundColor: colors.creamCard, borderWidth: 1, borderColor: colors.border }}>
+              <Ionicons name="close" size={20} color={colors.greenDark} />
             </Pressable>
-            <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 20, color: Colors.greenDark, flex: 1, textAlign: 'center', marginHorizontal: 12 }} numberOfLines={1}>
+            <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 20, color: colors.greenDark, flex: 1, textAlign: 'center', marginHorizontal: 12 }} numberOfLines={1}>
               {list?.name}
             </Text>
             <View style={{ width: 40, alignItems: 'flex-end' }}>
-              <Text style={{ fontSize: 14, color: Colors.muted, fontWeight: '600' }}>
+              <Text style={{ fontSize: 14, color: colors.muted, fontWeight: '600' }}>
                 {checkedCount}/{total}
               </Text>
             </View>
           </View>
           {total > 0 && (
-            <View style={{ height: 3, backgroundColor: Colors.border, borderRadius: 2, marginTop: 14, overflow: 'hidden' }}>
-              <View style={{ height: 3, backgroundColor: Colors.green, borderRadius: 2, width: `${donePct}%` }} />
+            <View style={{ height: 3, backgroundColor: colors.border, borderRadius: 2, marginTop: 14, overflow: 'hidden' }}>
+              <View style={{ height: 3, backgroundColor: colors.green, borderRadius: 2, width: `${donePct}%` }} />
             </View>
           )}
         </View>
@@ -481,15 +483,15 @@ export default function ListDetail() {
                 <View style={{
                   marginHorizontal: 16,
                   borderRadius: 16,
-                  backgroundColor: Colors.creamCard,
+                  backgroundColor: colors.creamCard,
                   borderWidth: 1,
-                  borderColor: Colors.border,
+                  borderColor: colors.border,
                   overflow: 'hidden',
                 }}>
                   {sorted.map((item, idx) => (
                     <View key={item.id}>
                       {idx > 0 && (
-                        <View style={{ height: 1, backgroundColor: Colors.border, marginLeft: 62 }} />
+                        <View style={{ height: 1, backgroundColor: colors.border, marginLeft: 62 }} />
                       )}
                       <ShoppingItemRow
                         item={item}
@@ -507,8 +509,8 @@ export default function ListDetail() {
 
           {shoppingCategories.length === 0 && (
             <View style={{ alignItems: 'center', marginTop: 60, gap: 12 }}>
-              <Ionicons name="checkmark-circle" size={52} color={Colors.green} />
-              <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 24, color: Colors.greenDark }}>
+              <Ionicons name="checkmark-circle" size={52} color={colors.green} />
+              <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 24, color: colors.greenDark }}>
                 {t('list.empty')}
               </Text>
             </View>
@@ -525,13 +527,13 @@ export default function ListDetail() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 6,
-                backgroundColor: pressed ? '#fef2f2' : 'transparent',
+                backgroundColor: pressed ? colors.dangerBg : 'transparent',
                 borderWidth: 1,
-                borderColor: '#f5c6c6',
+                borderColor: colors.dangerBorder,
               })}
               onPress={() => clearChecked.mutate(id)}>
-              <Ionicons name="trash-outline" size={15} color="#c0392b" />
-              <Text style={{ fontSize: 14, fontWeight: '500', color: '#c0392b' }}>
+              <Ionicons name="trash-outline" size={15} color={colors.dangerText} />
+              <Text style={{ fontSize: 14, fontWeight: '500', color: colors.dangerText }}>
                 {t('list.clear_checked')}
               </Text>
             </Pressable>
@@ -544,7 +546,7 @@ export default function ListDetail() {
   // ── Regular view ──────────────────────────────────────────────────────────
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: Colors.cream }}
+      style={{ flex: 1, backgroundColor: colors.cream }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={0}>
 
@@ -553,13 +555,13 @@ export default function ListDetail() {
         <Pressable
           style={{ flexDirection: 'row', alignItems: 'center', gap: 4, padding: 8 }}
           onPress={() => router.canGoBack() ? router.back() : router.replace('/')}>
-          <Ionicons name="chevron-back" size={22} color={Colors.green} />
-          <Text style={{ color: Colors.green, fontSize: 16, fontWeight: '500' }}>{t('list.back')}</Text>
+          <Ionicons name="chevron-back" size={22} color={colors.green} />
+          <Text style={{ color: colors.green, fontSize: 16, fontWeight: '500' }}>{t('list.back')}</Text>
         </Pressable>
         <Pressable
-          style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.creamCard, borderWidth: 1, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center', marginRight: 8 }}
+          style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.creamCard, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', marginRight: 8 }}
           onPress={() => setShowShare(true)}>
-          <Ionicons name="share-outline" size={18} color={Colors.greenDark} />
+          <Ionicons name="share-outline" size={18} color={colors.greenDark} />
         </Pressable>
       </View>
 
@@ -569,14 +571,15 @@ export default function ListDetail() {
         renderItem={renderItem}
         onDragEnd={handleDragEnd}
         activationDistance={10}
+        containerStyle={{ flex: 1 }}
         ListHeaderComponent={
           <View>
             {/* Title + remaining count */}
             <View style={{ paddingHorizontal: 24, paddingTop: 4, paddingBottom: 16 }}>
-              <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 32, color: Colors.greenDark }}>
+              <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 32, color: colors.greenDark }}>
                 {list?.name ?? ''}
               </Text>
-              <Text style={{ fontSize: 13, color: Colors.muted, marginTop: 4 }}>
+              <Text style={{ fontSize: 13, color: colors.muted, marginTop: 4 }}>
                 {total - checkedCount} {t('list.remaining')}
               </Text>
             </View>
@@ -585,9 +588,9 @@ export default function ListDetail() {
             <View style={{ flexDirection: 'row', gap: 8, marginHorizontal: 16, marginBottom: 12 }}>
               <TextInput
                 ref={inputRef}
-                style={{ flex: 1, backgroundColor: Colors.creamCard, borderWidth: 1, borderColor: Colors.border, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14, fontSize: 15, color: Colors.text }}
+                style={{ flex: 1, backgroundColor: colors.creamCard, borderWidth: 1, borderColor: colors.border, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14, fontSize: 15, color: colors.text }}
                 placeholder={`+ ${t('list.add_item')}…`}
-                placeholderTextColor={Colors.muted}
+                placeholderTextColor={colors.muted}
                 value={input}
                 onChangeText={setInput}
                 onSubmitEditing={handleAdd}
@@ -595,7 +598,7 @@ export default function ListDetail() {
                 blurOnSubmit={false}
               />
               <Pressable
-                style={{ backgroundColor: Colors.green, borderRadius: 14, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center' }}
+                style={{ backgroundColor: colors.green, borderRadius: 14, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center' }}
                 onPress={handleAdd}
                 disabled={addItems.isPending}>
                 {addItems.isPending
@@ -604,7 +607,7 @@ export default function ListDetail() {
               </Pressable>
             </View>
             {addError ? (
-              <Text style={{ color: '#c0392b', fontSize: 13, marginHorizontal: 16, marginBottom: 8 }}>{addError}</Text>
+              <Text style={{ color: colors.dangerText, fontSize: 13, marginHorizontal: 16, marginBottom: 8 }}>{addError}</Text>
             ) : null}
 
             {/* Quick actions */}
@@ -615,10 +618,10 @@ export default function ListDetail() {
               ].map(({ icon, label, onPress }) => (
                 <Pressable
                   key={label}
-                  style={({ pressed }) => ({ backgroundColor: pressed ? '#f5f1e8' : Colors.creamCard, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 6 })}
+                  style={({ pressed }) => ({ backgroundColor: pressed ? colors.pressedBg : colors.creamCard, borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 6 })}
                   onPress={onPress}>
-                  <Ionicons name={icon} size={14} color={Colors.greenDark} />
-                  <Text style={{ fontSize: 13, fontWeight: '500', color: Colors.greenDark }} numberOfLines={1}>{label}</Text>
+                  <Ionicons name={icon} size={14} color={colors.greenDark} />
+                  <Text style={{ fontSize: 13, fontWeight: '500', color: colors.greenDark }} numberOfLines={1}>{label}</Text>
                 </Pressable>
               ))}
             </ScrollView>
@@ -627,19 +630,31 @@ export default function ListDetail() {
             {total > 0 && (
               <View style={{ marginHorizontal: 24, marginBottom: 16 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <Text style={{ fontSize: 12, color: Colors.muted, fontWeight: '500' }}>
+                  <Text style={{ fontSize: 12, color: colors.muted, fontWeight: '500' }}>
                     {t('list.progress', { checked: checkedCount, total })}
                   </Text>
-                  <Text style={{ fontSize: 12, color: Colors.muted, fontWeight: '500' }}>{progressPct}%</Text>
+                  <Text style={{ fontSize: 12, color: colors.muted, fontWeight: '500' }}>{progressPct}%</Text>
                 </View>
-                <View style={{ height: 4, backgroundColor: Colors.border, borderRadius: 2, overflow: 'hidden' }}>
-                  <View style={{ height: 4, backgroundColor: Colors.green, borderRadius: 2, width: `${progressPct}%` }} />
+                <View style={{ height: 4, backgroundColor: colors.border, borderRadius: 2, overflow: 'hidden' }}>
+                  <View style={{ height: 4, backgroundColor: colors.green, borderRadius: 2, width: `${progressPct}%` }} />
                 </View>
               </View>
             )}
           </View>
         }
-        ListEmptyComponent={isLoading ? <ActivityIndicator color={Colors.green} style={{ marginTop: 40 }} /> : null}
+        ListEmptyComponent={
+          isLoading ? (
+            <ActivityIndicator color={colors.green} style={{ marginTop: 40 }} />
+          ) : itemsError ? (
+            <Text style={{ color: colors.dangerText, fontSize: 13, textAlign: 'center', marginTop: 40, marginHorizontal: 24 }}>
+              {String(itemsError instanceof Error ? itemsError.message : itemsError)}
+            </Text>
+          ) : (
+            <Text style={{ color: colors.muted, fontSize: 14, textAlign: 'center', marginTop: 40 }}>
+              {t('list.empty')}
+            </Text>
+          )
+        }
         ListFooterComponent={
           checkedCount > 0 ? (
             <Pressable
@@ -653,13 +668,13 @@ export default function ListDetail() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 6,
-                backgroundColor: pressed ? '#fef2f2' : 'transparent',
+                backgroundColor: pressed ? colors.dangerBg : 'transparent',
                 borderWidth: 1,
-                borderColor: '#f5c6c6',
+                borderColor: colors.dangerBorder,
               })}
               onPress={() => clearChecked.mutate(id)}>
-              <Ionicons name="trash-outline" size={15} color="#c0392b" />
-              <Text style={{ fontSize: 14, fontWeight: '500', color: '#c0392b' }}>
+              <Ionicons name="trash-outline" size={15} color={colors.dangerText} />
+              <Text style={{ fontSize: 14, fontWeight: '500', color: colors.dangerText }}>
                 {t('list.clear_checked')}
               </Text>
             </Pressable>
@@ -672,7 +687,7 @@ export default function ListDetail() {
       <View style={{ position: 'absolute', bottom: 28, left: 16, right: 16 }}>
         <Pressable
           style={({ pressed }) => ({
-            backgroundColor: pressed ? Colors.greenDark : Colors.green,
+            backgroundColor: pressed ? colors.greenDark : colors.green,
             borderRadius: 18,
             paddingVertical: 18,
             flexDirection: 'row',
@@ -698,30 +713,30 @@ export default function ListDetail() {
       {/* Save as template modal */}
       <Modal visible={showSaveTpl} transparent animationType="slide">
         <Pressable
-          style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }}
+          style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}
           onPress={() => setShowSaveTpl(false)}>
-          <Pressable style={{ backgroundColor: Colors.cream, borderRadius: 24, padding: 24, paddingBottom: 40 }}>
-            <View style={{ width: 36, height: 4, backgroundColor: Colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: 16 }} />
-            <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 22, color: Colors.greenDark, marginBottom: 16 }}>
+          <Pressable style={{ backgroundColor: colors.cream, borderRadius: 24, padding: 24, paddingBottom: 40 }}>
+            <View style={{ width: 36, height: 4, backgroundColor: colors.border, borderRadius: 2, alignSelf: 'center', marginBottom: 16 }} />
+            <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 22, color: colors.greenDark, marginBottom: 16 }}>
               {t('template.save_as')}
             </Text>
             {tplSaved ? (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 16 }}>
-                <Ionicons name="checkmark-circle" size={24} color={Colors.green} />
-                <Text style={{ fontSize: 16, color: Colors.green, fontWeight: '600' }}>{t('template.saved')}</Text>
+                <Ionicons name="checkmark-circle" size={24} color={colors.green} />
+                <Text style={{ fontSize: 16, color: colors.green, fontWeight: '600' }}>{t('template.saved')}</Text>
               </View>
             ) : (
               <>
                 <TextInput
-                  style={{ backgroundColor: Colors.creamCard, borderWidth: 1, borderColor: Colors.border, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14, fontSize: 16, color: Colors.text, marginBottom: 16 }}
+                  style={{ backgroundColor: colors.creamCard, borderWidth: 1, borderColor: colors.border, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14, fontSize: 16, color: colors.text, marginBottom: 16 }}
                   placeholder={t('template.template_name')}
-                  placeholderTextColor={Colors.muted}
+                  placeholderTextColor={colors.muted}
                   value={tplName}
                   onChangeText={setTplName}
                   autoFocus
                 />
                 <Pressable
-                  style={{ backgroundColor: tplName.trim() ? Colors.green : Colors.border, borderRadius: 14, paddingVertical: 16, alignItems: 'center' }}
+                  style={{ backgroundColor: tplName.trim() ? colors.green : colors.border, borderRadius: 14, paddingVertical: 16, alignItems: 'center' }}
                   disabled={!tplName.trim() || saveAsTemplate.isPending}
                   onPress={async () => {
                     await saveAsTemplate.mutateAsync({ listId: id, name: tplName });

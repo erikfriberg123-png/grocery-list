@@ -5,6 +5,7 @@ import { supabase } from '@/src/lib/supabase';
 import { useAuthStore } from '@/src/features/auth/store';
 import { parseItem, type ParsedItem } from '@/src/lib/parse-item';
 
+
 /** Tries the Edge Function with a 3-second timeout, falls back to client-side parser. */
 async function normalizeItem(text: string): Promise<ParsedItem> {
   const edgeFn = supabase.functions.invoke('normalize-shopping-item', {
@@ -24,9 +25,11 @@ async function normalizeItem(text: string): Promise<ParsedItem> {
 
 export function useItems(listId: string) {
   const qc = useQueryClient();
+  const session = useAuthStore((s) => s.session);
 
   // Realtime subscription — one per mounted list view, cleaned up on unmount
   useEffect(() => {
+    if (!session) return;
     const channel = supabase
       .channel(`items:${listId}`)
       .on(
@@ -37,10 +40,11 @@ export function useItems(listId: string) {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [listId]);
+  }, [listId, session]);
 
   return useQuery({
     queryKey: ['items', listId],
+    enabled: !!session,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('shopping_items')

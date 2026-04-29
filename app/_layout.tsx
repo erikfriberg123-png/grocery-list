@@ -9,12 +9,12 @@ import { useRouter, useSegments, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { supabase } from '@/src/lib/supabase';
 import { useAuthStore } from '@/src/features/auth/store';
 import { queryClient } from '@/src/lib/query-client';
+import { useThemeStore } from '@/src/features/theme/use-theme';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -71,26 +71,27 @@ function AuthGate() {
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({ CormorantGaramond_500Medium });
+  const isDark = useThemeStore((s) => s.mode === 'dark');
 
   useEffect(() => {
     if (fontsLoaded) SplashScreen.hideAsync();
   }, [fontsLoaded]);
 
-  if (!fontsLoaded) return null;
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
         <AuthGate />
-        <Stack>
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="list/[id]" options={{ headerShown: false }} />
-          <Stack.Screen name="guest/[token]" options={{ headerShown: false }} />
-          <Stack.Screen name="import" options={{ headerShown: false }} />
-          <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
-        </Stack>
-        <StatusBar style="dark" />
+        {fontsLoaded ? (
+          <Stack>
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="list/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="guest/[token]" options={{ headerShown: false }} />
+            <Stack.Screen name="import" options={{ headerShown: false }} />
+            <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
+          </Stack>
+        ) : null}
+        <StatusBar style={isDark ? 'light' : 'dark'} />
       </QueryClientProvider>
     </GestureHandlerRootView>
   );

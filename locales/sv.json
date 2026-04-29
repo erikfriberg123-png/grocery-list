@@ -51,7 +51,9 @@
     "active_count": "{{count}} aktiva",
     "import": "Importera",
     "clear_checked": "Rensa köpta",
-    "shopping_mode": "Handlingsläge"
+    "shopping_mode": "Handlingsläge",
+    "delete": "Ta bort lista",
+    "delete_confirm": "Listan och alla dess varor raderas permanent."
   },
   "item": {
     "quantity": "Antal",
@@ -102,8 +104,41 @@
     "pharmacy": "Apotek",
     "other": "Övrigt"
   },
+  "recipe": {
+    "title": "Mina recept",
+    "subtitle": "Spara receptlänkar, lägg till bilder och bläddra per matkategori.",
+    "search": "Sök recept…",
+    "show_all": "Alla",
+    "add": "+ Lägg till recept",
+    "add_title": "Lägg till recept",
+    "edit_title": "Redigera recept",
+    "name": "Receptnamn",
+    "url": "Recept-URL (valfritt)",
+    "image_url": "Bild-URL (valfritt)",
+    "note": "Anteckningar (valfritt)",
+    "open": "Öppna",
+    "edit": "Redigera",
+    "no_recipes": "Inga recept än — lägg till ditt första nedan.",
+    "no_results": "Inga recept matchar sökningen.",
+    "photo": "Foto",
+    "change_photo": "Byt foto",
+    "remove_photo": "Ta bort",
+    "upload_photo": "Ladda upp foto från biblioteket"
+  },
+  "recipe_category": {
+    "meat": "Kött",
+    "fish": "Fisk",
+    "salads": "Sallader",
+    "pasta": "Pasta",
+    "vegetarian": "Vegetariskt",
+    "soups": "Soppor",
+    "desserts": "Desserter",
+    "other": "Övrigt",
+    "all": "Alla"
+  },
   "template": {
     "save_as": "Spara som mall",
+    "label": "Mall",
     "template_name": "Mallnamn",
     "saved": "Sparad som mall!",
     "from_template": "Från mall",
@@ -115,6 +150,8 @@
   "settings": {
     "title": "Hushåll",
     "language": "Språk",
+    "appearance": "Utseende",
+    "dark_mode": "Mörkt läge",
     "sign_out": "Logga ut"
   },
   "onboarding": {

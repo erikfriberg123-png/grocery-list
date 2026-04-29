@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Switch, Text, View } from 'react-native';
 
-import { Colors } from '@/constants/colors';
+import { useThemeColors, useThemeStore } from '@/src/features/theme/use-theme';
 import { useAuth } from '@/src/features/auth/use-auth';
 import { SUPPORTED_LANGUAGES, useLanguage, type LangCode } from '@/src/features/language/use-language';
 
@@ -10,22 +10,25 @@ export default function HouseholdScreen() {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const { currentLanguage, setLanguage } = useLanguage();
+  const colors = useThemeColors();
+  const { mode, toggle } = useThemeStore();
+  const isDark = mode === 'dark';
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.cream }}>
+    <View style={{ flex: 1, backgroundColor: colors.cream }}>
       {/* Header */}
       <View style={{ paddingHorizontal: 24, paddingTop: 56, paddingBottom: 24 }}>
-        <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 36, color: Colors.greenDark, lineHeight: 40 }}>
+        <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 36, color: colors.greenDark, lineHeight: 40 }}>
           {t('settings.title')}
         </Text>
         {user && (
-          <Text style={{ fontSize: 14, color: Colors.muted, marginTop: 4 }}>{user.email}</Text>
+          <Text style={{ fontSize: 14, color: colors.muted, marginTop: 4 }}>{user.email}</Text>
         )}
       </View>
 
       {/* Language selector */}
-      <View style={{ marginHorizontal: 24, marginBottom: 24 }}>
-        <Text style={{ fontSize: 12, fontWeight: '700', color: Colors.muted, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 }}>
+      <View style={{ marginHorizontal: 24, marginBottom: 28 }}>
+        <Text style={{ fontSize: 12, fontWeight: '700', color: colors.muted, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 }}>
           {t('settings.language')}
         </Text>
         <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -40,16 +43,16 @@ export default function HouseholdScreen() {
                   paddingVertical: 12,
                   borderRadius: 12,
                   borderWidth: active ? 2 : 1,
-                  borderColor: active ? Colors.green : Colors.border,
-                  backgroundColor: active ? `${Colors.green}12` : (pressed ? Colors.greenLight : Colors.creamCard),
+                  borderColor: active ? colors.green : colors.border,
+                  backgroundColor: active ? `${colors.green}18` : (pressed ? colors.greenLight : colors.creamCard),
                   alignItems: 'center',
                   gap: 4,
                 })}>
-                <Text style={{ fontSize: 13, fontWeight: active ? '700' : '500', color: active ? Colors.green : Colors.text }}>
+                <Text style={{ fontSize: 13, fontWeight: active ? '700' : '500', color: active ? colors.green : colors.text }}>
                   {label}
                 </Text>
                 {active && (
-                  <Ionicons name="checkmark-circle" size={14} color={Colors.green} />
+                  <Ionicons name="checkmark-circle" size={14} color={colors.green} />
                 )}
               </Pressable>
             );
@@ -57,14 +60,73 @@ export default function HouseholdScreen() {
         </View>
       </View>
 
+      {/* Appearance */}
+      <View style={{ marginHorizontal: 24, marginBottom: 28 }}>
+        <Text style={{ fontSize: 12, fontWeight: '700', color: colors.muted, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 }}>
+          {t('settings.appearance')}
+        </Text>
+        <View style={{
+          backgroundColor: colors.creamCard,
+          borderRadius: 14,
+          borderWidth: 1,
+          borderColor: colors.border,
+          paddingVertical: 4,
+        }}>
+          <Pressable
+            onPress={toggle}
+            style={({ pressed }) => ({
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingHorizontal: 16,
+              paddingVertical: 14,
+              gap: 12,
+              backgroundColor: pressed ? colors.pressedBg : 'transparent',
+              borderRadius: 13,
+            })}>
+            {/* Icon pair */}
+            <View style={{
+              width: 36, height: 36, borderRadius: 10,
+              backgroundColor: isDark ? colors.greenLight : `${colors.green}14`,
+              alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Ionicons
+                name={isDark ? 'moon' : 'sunny'}
+                size={18}
+                color={isDark ? colors.greenDark : colors.green}
+              />
+            </View>
+
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text }}>
+                {t('settings.dark_mode')}
+              </Text>
+              <Text style={{ fontSize: 12, color: colors.muted, marginTop: 1 }}>
+                {isDark ? '🌙' : '☀️'} {isDark ? (currentLanguage === 'sv' ? 'Mörkt' : 'Dark') : (currentLanguage === 'sv' ? 'Ljust' : 'Light')}
+              </Text>
+            </View>
+
+            <Switch
+              value={isDark}
+              onValueChange={toggle}
+              trackColor={{ false: colors.border, true: colors.green }}
+              thumbColor={isDark ? colors.greenDark : '#ffffff'}
+              ios_backgroundColor={colors.border}
+            />
+          </Pressable>
+        </View>
+      </View>
+
       {/* Sign out */}
       <View style={{ marginHorizontal: 24 }}>
+        <Text style={{ fontSize: 12, fontWeight: '700', color: colors.muted, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 }}>
+          {t('settings.sign_out')}
+        </Text>
         <Pressable
           onPress={signOut}
           style={({ pressed }) => ({
-            backgroundColor: pressed ? '#f5f1e8' : Colors.creamCard,
+            backgroundColor: pressed ? colors.dangerBg : colors.creamCard,
             borderWidth: 1,
-            borderColor: Colors.border,
+            borderColor: pressed ? colors.dangerBorder : colors.border,
             borderRadius: 14,
             paddingVertical: 14,
             paddingHorizontal: 16,
@@ -72,8 +134,8 @@ export default function HouseholdScreen() {
             alignItems: 'center',
             gap: 10,
           })}>
-          <Ionicons name="log-out-outline" size={18} color="#c0392b" />
-          <Text style={{ fontSize: 15, fontWeight: '500', color: '#c0392b' }}>
+          <Ionicons name="log-out-outline" size={18} color={colors.dangerText} />
+          <Text style={{ fontSize: 15, fontWeight: '500', color: colors.dangerText }}>
             {t('settings.sign_out')}
           </Text>
         </Pressable>

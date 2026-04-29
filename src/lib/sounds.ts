@@ -10,9 +10,14 @@ function getCtx(): AudioContext | null {
   const Ctor = (window as any).AudioContext ?? (window as any).webkitAudioContext;
   if (!Ctor) return null;
   if (!_ctx) _ctx = new Ctor() as AudioContext;
-  // Resume after browser suspends context due to autoplay policy
-  if (_ctx.state === 'suspended') void _ctx.resume();
   return _ctx;
+}
+
+async function getCtxReady(): Promise<AudioContext | null> {
+  const c = getCtx();
+  if (!c) return null;
+  if (c.state === 'suspended') await c.resume();
+  return c;
 }
 
 function tone(
@@ -36,8 +41,8 @@ function tone(
 }
 
 /** Two-note upward pop — played when an item is added. */
-export function soundAdd() {
-  const c = getCtx();
+export async function soundAdd() {
+  const c = await getCtxReady();
   if (c) {
     const t = c.currentTime;
     tone(c, 523, 0.07, t);         // C5
@@ -48,8 +53,8 @@ export function soundAdd() {
 }
 
 /** Rising two-note chime — played when an item is checked off. */
-export function soundCheck() {
-  const c = getCtx();
+export async function soundCheck() {
+  const c = await getCtxReady();
   if (c) {
     const t = c.currentTime;
     tone(c, 784, 0.10, t);          // G5
@@ -60,8 +65,8 @@ export function soundCheck() {
 }
 
 /** Soft single tick — played when a drag-and-drop reorder completes. */
-export function soundReorder() {
-  const c = getCtx();
+export async function soundReorder() {
+  const c = await getCtxReady();
   if (c) {
     tone(c, 392, 0.06, c.currentTime, 0.15); // G4, quieter
   } else {

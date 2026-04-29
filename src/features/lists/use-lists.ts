@@ -79,6 +79,19 @@ export function useRenameList() {
   });
 }
 
+export function useDeleteList() {
+  const qc = useQueryClient();
+  const { data: householdId } = useHousehold();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('shopping_lists').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['lists', householdId] }),
+  });
+}
+
 export function useArchiveList() {
   const qc = useQueryClient();
   const { data: householdId } = useHousehold();
