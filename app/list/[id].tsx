@@ -712,6 +712,9 @@ export default function ListDetail() {
 
       {/* Save as template modal */}
       <Modal visible={showSaveTpl} transparent animationType="slide">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}>
         <Pressable
           style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}
           onPress={() => setShowSaveTpl(false)}>
@@ -751,6 +754,7 @@ export default function ListDetail() {
             )}
           </Pressable>
         </Pressable>
+        </KeyboardAvoidingView>
       </Modal>
     </KeyboardAvoidingView>
   );
