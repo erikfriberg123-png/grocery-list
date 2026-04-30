@@ -23,6 +23,7 @@ import { z } from 'zod';
 import { Colors } from '@/constants/colors';
 import { useAuthStore } from '@/src/features/auth/store';
 import { supabase } from '@/src/lib/supabase';
+import { SUPPORTED_LANGUAGES, useLanguage, type LangCode } from '@/src/features/language/use-language';
 
 const { width } = Dimensions.get('window');
 
@@ -350,6 +351,36 @@ function AuthStep({ onBack }: { onBack: () => void }) {
   );
 }
 
+// ─── Language picker ─────────────────────────────────────────────────────────
+
+function LanguagePicker() {
+  const { currentLanguage, setLanguage } = useLanguage();
+  return (
+    <View style={{ flexDirection: 'row', gap: 6 }}>
+      {SUPPORTED_LANGUAGES.map(({ code, label }) => {
+        const active = currentLanguage === code;
+        return (
+          <Pressable
+            key={code}
+            onPress={() => setLanguage(code as LangCode)}
+            style={({ pressed }) => ({
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: 20,
+              borderWidth: 1,
+              borderColor: active ? Colors.green : Colors.border,
+              backgroundColor: active ? `${Colors.green}18` : (pressed ? Colors.greenLight : 'transparent'),
+            })}>
+            <Text style={{ fontSize: 13, fontWeight: active ? '700' : '400', color: active ? Colors.green : Colors.muted }}>
+              {label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 // ─── Dots ─────────────────────────────────────────────────────────────────────
 
 function Dots({ activeIndex }: { activeIndex: number }) {
@@ -392,9 +423,13 @@ export default function OnboardingScreen() {
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (isLastSlide) {
-      goToAuth();
+      if (session) {
+        await completeOnboarding();
+      } else {
+        goToAuth();
+      }
     } else {
       const next = slideIndex + 1;
       scrollRef.current?.scrollTo({ x: next * width, animated: true });
@@ -413,6 +448,11 @@ export default function OnboardingScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.cream }}>
+      {/* Language picker — top right */}
+      <View style={{ position: 'absolute', top: 56, right: 24, zIndex: 10 }}>
+        <LanguagePicker />
+      </View>
+
       {/* Slides */}
       <ScrollView
         ref={scrollRef}

@@ -82,9 +82,8 @@ function AuthGate() {
 
     if (session) {
       if (!onboardingDone) {
-        AsyncStorage.setItem('onboarding_complete', 'true');
-        setOnboardingDone(true);
-        if (!inTabs) router.replace('/(tabs)');
+        // Show onboarding even for logged-in users (e.g. "show intro again")
+        if (!inOnboarding) router.replace('/onboarding');
       } else {
         if (inAuthGroup || inOnboarding) router.replace('/(tabs)');
       }
