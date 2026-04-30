@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Switch, Text, View } from 'react-native';
 
@@ -11,11 +12,13 @@ import { SUPPORTED_LANGUAGES, useLanguage, type LangCode } from '@/src/features/
 export default function HouseholdScreen() {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
+  const router = useRouter();
   const setOnboardingDone = useAuthStore((s) => s.setOnboardingDone);
 
   const resetOnboarding = async () => {
     await AsyncStorage.removeItem('onboarding_complete');
     setOnboardingDone(false);
+    router.replace('/onboarding');
   };
   const { currentLanguage, setLanguage } = useLanguage();
   const colors = useThemeColors();
