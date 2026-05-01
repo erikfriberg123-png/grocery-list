@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import ReanimatedSwipeable, { type SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import * as ImagePicker from 'expo-image-picker';
-import { useRef, useState } from 'react';
+import { useRef, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -527,14 +527,17 @@ export default function RecipesScreen() {
   const [showSheet, setShowSheet]           = useState(false);
   const [editingId, setEditingId]           = useState<string | null>(null);
 
-  const editingRecipe = recipes.find(r => r.id === editingId) ?? null;
+  const editingRecipe = useMemo(
+    () => recipes.find(r => r.id === editingId) ?? null,
+    [recipes, editingId],
+  );
 
-  const filtered = recipes.filter(r => {
+  const filtered = useMemo(() => recipes.filter(r => {
     const matchesCat    = activeCategory === null || r.category === activeCategory;
     const q             = search.trim().toLowerCase();
     const matchesSearch = !q || r.name.toLowerCase().includes(q) || (r.note ?? '').toLowerCase().includes(q);
     return matchesCat && matchesSearch;
-  });
+  }), [recipes, activeCategory, search]);
 
   const handleSave = async (form: RecipeForm, existingImagePath: string | null) => {
     await upsertRecipe.mutateAsync({ id: editingId ?? undefined, form, existingImagePath });

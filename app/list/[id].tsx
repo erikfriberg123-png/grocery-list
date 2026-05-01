@@ -296,8 +296,8 @@ export default function ListDetail() {
     }
   };
 
-  const active       = items?.filter((i) => i.status === 'active') ?? [];
-  const checked      = items?.filter((i) => i.status === 'checked') ?? [];
+  const active       = useMemo(() => items?.filter((i) => i.status === 'active') ?? [], [items]);
+  const checked      = useMemo(() => items?.filter((i) => i.status === 'checked') ?? [], [items]);
   const total        = items?.length ?? 0;
   const checkedCount = checked.length;
   const progressPct  = total === 0 ? 0 : Math.round((checkedCount / total) * 100);

@@ -38,7 +38,7 @@ async function acceptPendingInvite(accessToken: string) {
       },
       body: JSON.stringify({ token }),
     });
-    queryClient.invalidateQueries();
+    queryClient.invalidateQueries({ queryKey: ['household_members'] });
   } catch (e) {
     console.warn('auto-accept invite failed:', e);
   }

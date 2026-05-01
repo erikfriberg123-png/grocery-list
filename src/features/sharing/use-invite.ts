@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as Clipboard from 'expo-clipboard';
 import * as Linking from 'expo-linking';
 import { supabase } from '@/src/lib/supabase';
@@ -8,6 +8,9 @@ export function useCreateInvite() {
   const [loading, setLoading]    = useState(false);
   const [error, setError]        = useState<string | null>(null);
   const [copied, setCopied]      = useState(false);
+  const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => { if (copiedTimer.current) clearTimeout(copiedTimer.current); }, []);
 
   const createInvite = async () => {
     setLoading(true);
@@ -43,9 +46,13 @@ export function useCreateInvite() {
 
   const copyLink = async () => {
     if (!inviteUrl) return;
-    await Clipboard.setStringAsync(inviteUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await Clipboard.setStringAsync(inviteUrl);
+      setCopied(true);
+      copiedTimer.current = setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard not available
+    }
   };
 
   const reset = () => { setInviteUrl(null); setError(null); setCopied(false); };
