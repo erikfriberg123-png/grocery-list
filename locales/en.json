@@ -170,7 +170,13 @@
     "delete_account": "Delete account",
     "delete_account_title": "Delete account?",
     "delete_account_warning": "This will permanently delete your account and all your data. All household members will lose access to shared lists and recipes. This cannot be undone.",
-    "delete_account_confirm": "Yes, delete everything"
+    "delete_account_confirm": "Yes, delete everything",
+    "members": "Members",
+    "role_owner": "Owner",
+    "role_member": "Member",
+    "remove_member_title": "Remove member?",
+    "remove_member_body": "This will remove {{name}} from your household. They will lose access to all shared lists and recipes.",
+    "remove_member_confirm": "Remove"
   },
   "onboarding": {
     "slide1_title": "Welcome to Lista",

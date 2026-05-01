@@ -10,6 +10,7 @@ import { useAuth } from '@/src/features/auth/use-auth';
 import { useAuthStore } from '@/src/features/auth/store';
 import { supabase } from '@/src/lib/supabase';
 import { SUPPORTED_LANGUAGES, useLanguage, type LangCode } from '@/src/features/language/use-language';
+import { useHouseholdMembers, useRemoveHouseholdMember } from '@/src/features/household/use-household-members';
 
 export default function HouseholdScreen() {
   const { t } = useTranslation();
@@ -19,6 +20,11 @@ export default function HouseholdScreen() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const { data: members = [] } = useHouseholdMembers();
+  const removeMember = useRemoveHouseholdMember();
+  const currentUserRole = members.find(m => m.user_id === user?.id)?.role;
+  const isOwner = currentUserRole === 'owner';
 
   const resetOnboarding = async () => {
     await AsyncStorage.removeItem('onboarding_complete');
@@ -161,6 +167,64 @@ export default function HouseholdScreen() {
           </Pressable>
         </View>
       </View>
+
+      {/* Members */}
+      {members.length > 0 && (
+        <View style={{ marginHorizontal: 24, marginBottom: 28 }}>
+          <Text style={{ fontSize: 12, fontWeight: '700', color: colors.muted, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 }}>
+            {t('settings.members')}
+          </Text>
+          <View style={{ backgroundColor: colors.creamCard, borderRadius: 14, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' }}>
+            {members.map((member, index) => {
+              const isSelf = member.user_id === user?.id;
+              const label = member.profiles?.display_name || member.profiles?.email || '—';
+              const canRemove = isOwner && !isSelf && member.role !== 'owner';
+              return (
+                <View
+                  key={member.id}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingHorizontal: 16,
+                    paddingVertical: 13,
+                    borderTopWidth: index === 0 ? 0 : 1,
+                    borderTopColor: colors.border,
+                    gap: 10,
+                  }}>
+                  <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: colors.greenLight, alignItems: 'center', justifyContent: 'center' }}>
+                    <Ionicons name="person" size={16} color={colors.green} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }} numberOfLines={1}>{label}</Text>
+                    <Text style={{ fontSize: 12, color: colors.muted }}>{member.role === 'owner' ? t('settings.role_owner') : t('settings.role_member')}</Text>
+                  </View>
+                  {canRemove && (
+                    <Pressable
+                      onPress={() =>
+                        Alert.alert(
+                          t('settings.remove_member_title'),
+                          t('settings.remove_member_body', { name: label }),
+                          [
+                            { text: t('common.cancel'), style: 'cancel' },
+                            {
+                              text: t('settings.remove_member_confirm'),
+                              style: 'destructive',
+                              onPress: () => removeMember.mutate(member.id),
+                            },
+                          ],
+                        )
+                      }
+                      hitSlop={8}
+                      style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
+                      <Ionicons name="person-remove-outline" size={18} color={colors.dangerText} />
+                    </Pressable>
+                  )}
+                </View>
+              );
+            })}
+          </View>
+        </View>
+      )}
 
       {/* Onboarding */}
       <View style={{ marginHorizontal: 24, marginBottom: 28 }}>

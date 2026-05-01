@@ -170,7 +170,13 @@
     "delete_account": "Radera konto",
     "delete_account_title": "Radera konto?",
     "delete_account_warning": "Detta raderar ditt konto och all din data permanent. Alla hushållsmedlemmar förlorar åtkomst till delade listor och recept. Det går inte att ångra.",
-    "delete_account_confirm": "Ja, radera allt"
+    "delete_account_confirm": "Ja, radera allt",
+    "members": "Medlemmar",
+    "role_owner": "Ägare",
+    "role_member": "Medlem",
+    "remove_member_title": "Ta bort medlem?",
+    "remove_member_body": "Detta tar bort {{name}} från ditt hushåll. De förlorar åtkomst till alla delade listor och recept.",
+    "remove_member_confirm": "Ta bort"
   },
   "onboarding": {
     "slide1_title": "Välkommen till Lista",
