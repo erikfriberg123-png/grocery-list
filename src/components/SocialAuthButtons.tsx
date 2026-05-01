@@ -10,11 +10,13 @@ type Props = {
 
 export function SocialAuthButtons({ onError }: Props) {
   const { t } = useTranslation();
-  const { handleGoogle, handleApple, loading, error, appleAvailable } = useSocialAuth();
+  const { handleApple, loading, error, appleAvailable } = useSocialAuth();
 
   useEffect(() => {
     if (error && onError) onError(error);
   }, [error]);
+
+  if (!appleAvailable) return null;
 
   return (
     <View style={{ gap: 10 }}>
@@ -24,34 +26,6 @@ export function SocialAuthButtons({ onError }: Props) {
         <Text style={{ fontSize: 12, color: '#9ca3af' }}>{t('auth.or')}</Text>
         <View style={{ flex: 1, height: 1, backgroundColor: '#e5e7eb' }} />
       </View>
-
-      {/* Google */}
-      <Pressable
-        onPress={handleGoogle}
-        disabled={loading !== null}
-        style={({ pressed }) => ({
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 10,
-          backgroundColor: pressed ? '#f3f4f6' : '#ffffff',
-          borderWidth: 1,
-          borderColor: '#e5e7eb',
-          borderRadius: 14,
-          paddingVertical: 14,
-          opacity: loading !== null ? 0.7 : 1,
-        })}>
-        {loading === 'google' ? (
-          <ActivityIndicator size="small" color="#374151" />
-        ) : (
-          <>
-            <Ionicons name="logo-google" size={18} color="#374151" />
-            <Text style={{ fontSize: 15, fontWeight: '600', color: '#374151' }}>
-              {t('auth.continue_google')}
-            </Text>
-          </>
-        )}
-      </Pressable>
 
       {/* Apple — iOS only */}
       {appleAvailable && (
