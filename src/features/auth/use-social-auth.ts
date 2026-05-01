@@ -1,23 +1,25 @@
 import { useState } from 'react';
 import { Platform } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { supabase } from '@/src/lib/supabase';
 
 WebBrowser.maybeCompleteAuthSession();
 
+// Deep-link scheme registered in app.json — must match Supabase redirect URL allowlist
+const REDIRECT_URL = 'grocerylist://';
+
 async function signInWithGoogle(): Promise<void> {
-  const redirectTo = Linking.createURL('/');
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo, skipBrowserRedirect: true },
+    options: { redirectTo: REDIRECT_URL, skipBrowserRedirect: true },
   });
   if (error) throw error;
   if (!data.url) throw new Error('No OAuth URL returned');
 
-  const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
-  if (result.type !== 'success') return;
+  const result = await WebBrowser.openAuthSessionAsync(data.url, REDIRECT_URL);
+  if (result.type === 'cancel' || result.type === 'dismiss') return;
+  if (result.type !== 'success') throw new Error('Browser auth failed');
 
   const { error: sessionError } = await supabase.auth.exchangeCodeForSession(result.url);
   if (sessionError) throw sessionError;
@@ -49,8 +51,10 @@ export function useSocialAuth() {
     try {
       await signInWithGoogle();
     } catch (e: unknown) {
-      if (e instanceof Error && e.message !== 'cancelled') {
-        setError(e.message);
+      const msg = e instanceof Error ? e.message : String(e);
+      // Ignore user-initiated cancellations
+      if (!msg.toLowerCase().includes('cancel') && msg !== 'dismiss') {
+        setError(msg);
       }
     } finally {
       setLoading(null);
@@ -63,9 +67,9 @@ export function useSocialAuth() {
     try {
       await signInWithApple();
     } catch (e: unknown) {
-      // ERR_CANCELED means user dismissed the sheet — not an error
-      if (e instanceof Error && (e as { code?: string }).code !== 'ERR_CANCELED') {
-        setError(e.message);
+      const code = (e as { code?: string }).code;
+      if (code !== 'ERR_CANCELED') {
+        setError(e instanceof Error ? e.message : String(e));
       }
     } finally {
       setLoading(null);

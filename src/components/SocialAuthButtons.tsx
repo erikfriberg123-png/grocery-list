@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +12,9 @@ export function SocialAuthButtons({ onError }: Props) {
   const { t } = useTranslation();
   const { handleGoogle, handleApple, loading, error, appleAvailable } = useSocialAuth();
 
-  if (error && onError) onError(error);
+  useEffect(() => {
+    if (error && onError) onError(error);
+  }, [error]);
 
   return (
     <View style={{ gap: 10 }}>
