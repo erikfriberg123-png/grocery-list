@@ -33,7 +33,10 @@
     "confirm_email_title": "Vérifiez votre e-mail",
     "confirm_email_body": "Nous avons envoyé un lien de confirmation. Ouvrez-le pour activer votre compte.",
     "email_placeholder": "vous@exemple.fr",
-    "password_placeholder": "••••••••"
+    "password_placeholder": "••••••••",
+    "or": "ou",
+    "continue_google": "Continuer avec Google",
+    "continue_apple": "Continuer avec Apple"
   },
   "list": {
     "title": "Mes listes",

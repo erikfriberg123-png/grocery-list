@@ -18,6 +18,7 @@ import { z } from 'zod';
 
 import { Colors } from '@/constants/colors';
 import { useAuth } from '@/src/features/auth/use-auth';
+import { SocialAuthButtons } from '@/src/components/SocialAuthButtons';
 
 const schema = z.object({
   email: z.string().email(),
@@ -145,6 +146,9 @@ export default function SignIn() {
             </View>
           )}
         />
+
+        {/* Social sign-in */}
+        <SocialAuthButtons onError={setServerError} />
 
         {/* Submit */}
         <Pressable

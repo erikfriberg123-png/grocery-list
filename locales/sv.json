@@ -33,7 +33,10 @@
     "confirm_email_title": "Kolla din e-post",
     "confirm_email_body": "Vi skickade en bekräftningslänk. Öppna den för att aktivera ditt konto.",
     "email_placeholder": "du@exempel.se",
-    "password_placeholder": "••••••••"
+    "password_placeholder": "••••••••",
+    "or": "eller",
+    "continue_google": "Fortsätt med Google",
+    "continue_apple": "Fortsätt med Apple"
   },
   "list": {
     "title": "Mina listor",

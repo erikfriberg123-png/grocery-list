@@ -1,0 +1,82 @@
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import { useSocialAuth } from '@/src/features/auth/use-social-auth';
+
+type Props = {
+  onError?: (msg: string) => void;
+};
+
+export function SocialAuthButtons({ onError }: Props) {
+  const { t } = useTranslation();
+  const { handleGoogle, handleApple, loading, error, appleAvailable } = useSocialAuth();
+
+  if (error && onError) onError(error);
+
+  return (
+    <View style={{ gap: 10 }}>
+      {/* Divider */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 4 }}>
+        <View style={{ flex: 1, height: 1, backgroundColor: '#e5e7eb' }} />
+        <Text style={{ fontSize: 12, color: '#9ca3af' }}>{t('auth.or')}</Text>
+        <View style={{ flex: 1, height: 1, backgroundColor: '#e5e7eb' }} />
+      </View>
+
+      {/* Google */}
+      <Pressable
+        onPress={handleGoogle}
+        disabled={loading !== null}
+        style={({ pressed }) => ({
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 10,
+          backgroundColor: pressed ? '#f3f4f6' : '#ffffff',
+          borderWidth: 1,
+          borderColor: '#e5e7eb',
+          borderRadius: 14,
+          paddingVertical: 14,
+          opacity: loading !== null ? 0.7 : 1,
+        })}>
+        {loading === 'google' ? (
+          <ActivityIndicator size="small" color="#374151" />
+        ) : (
+          <>
+            <Ionicons name="logo-google" size={18} color="#374151" />
+            <Text style={{ fontSize: 15, fontWeight: '600', color: '#374151' }}>
+              {t('auth.continue_google')}
+            </Text>
+          </>
+        )}
+      </Pressable>
+
+      {/* Apple — iOS only */}
+      {appleAvailable && (
+        <Pressable
+          onPress={handleApple}
+          disabled={loading !== null}
+          style={({ pressed }) => ({
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 10,
+            backgroundColor: pressed ? '#1a1a1a' : '#000000',
+            borderRadius: 14,
+            paddingVertical: 14,
+            opacity: loading !== null ? 0.7 : 1,
+          })}>
+          {loading === 'apple' ? (
+            <ActivityIndicator size="small" color="#ffffff" />
+          ) : (
+            <>
+              <Ionicons name="logo-apple" size={18} color="#ffffff" />
+              <Text style={{ fontSize: 15, fontWeight: '600', color: '#ffffff' }}>
+                {t('auth.continue_apple')}
+              </Text>
+            </>
+          )}
+        </Pressable>
+      )}
+    </View>
+  );
+}
