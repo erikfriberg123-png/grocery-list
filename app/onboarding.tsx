@@ -275,7 +275,9 @@ function AuthStep({ onBack }: { onBack: () => void }) {
                 ? <ActivityIndicator color="white" />
                 : <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>{t('auth.sign_in')}</Text>}
             </Pressable>
-            <SocialAuthButtons onError={setServerError} />
+            <View style={{ marginTop: 8 }}>
+              <SocialAuthButtons onError={setServerError} />
+            </View>
           </>
         ) : (
           <>
@@ -346,7 +348,9 @@ function AuthStep({ onBack }: { onBack: () => void }) {
                 ? <ActivityIndicator color="white" />
                 : <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>{t('auth.sign_up')}</Text>}
             </Pressable>
-            <SocialAuthButtons onError={setServerError} />
+            <View style={{ marginTop: 8 }}>
+              <SocialAuthButtons onError={setServerError} />
+            </View>
           </>
         )}
       </ScrollView>

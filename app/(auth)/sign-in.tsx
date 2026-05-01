@@ -147,9 +147,6 @@ export default function SignIn() {
           )}
         />
 
-        {/* Social sign-in */}
-        <SocialAuthButtons onError={setServerError} />
-
         {/* Submit */}
         <Pressable
           style={({ pressed }) => ({
@@ -170,6 +167,11 @@ export default function SignIn() {
             ? <ActivityIndicator color="white" />
             : <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>{t('auth.sign_in')}</Text>}
         </Pressable>
+
+        {/* Social sign-in */}
+        <View style={{ marginTop: 8 }}>
+          <SocialAuthButtons onError={setServerError} />
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
