@@ -166,7 +166,11 @@
     "appearance": "Utseende",
     "dark_mode": "Mörkt läge",
     "sign_out": "Logga ut",
-    "show_onboarding": "Visa introduktionen igen"
+    "show_onboarding": "Visa introduktionen igen",
+    "delete_account": "Radera konto",
+    "delete_account_title": "Radera konto?",
+    "delete_account_warning": "Detta raderar ditt konto och all din data permanent. Alla hushållsmedlemmar förlorar åtkomst till delade listor och recept. Det går inte att ångra.",
+    "delete_account_confirm": "Ja, radera allt"
   },
   "onboarding": {
     "slide1_title": "Välkommen till Lista",

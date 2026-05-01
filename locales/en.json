@@ -166,7 +166,11 @@
     "appearance": "Appearance",
     "dark_mode": "Dark mode",
     "sign_out": "Sign out",
-    "show_onboarding": "Show intro again"
+    "show_onboarding": "Show intro again",
+    "delete_account": "Delete account",
+    "delete_account_title": "Delete account?",
+    "delete_account_warning": "This will permanently delete your account and all your data. All household members will lose access to shared lists and recipes. This cannot be undone.",
+    "delete_account_confirm": "Yes, delete everything"
   },
   "onboarding": {
     "slide1_title": "Welcome to Lista",
