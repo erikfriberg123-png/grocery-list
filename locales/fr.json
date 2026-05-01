@@ -54,7 +54,9 @@
     "active_count": "{{count}} actives",
     "import": "Importer",
     "clear_checked": "Vider les cochés",
-    "shopping_mode": "Mode courses"
+    "shopping_mode": "Mode courses",
+    "delete": "Supprimer la liste",
+    "delete_confirm": "Cela supprimera définitivement la liste et tous ses articles."
   },
   "item": {
     "quantity": "Quantité",
@@ -78,6 +80,16 @@
     "permission_edit": "Peut modifier",
     "revoke": "Révoquer le lien"
   },
+  "invite": {
+    "title": "Vous êtes invité !",
+    "subtitle": "Rejoignez le foyer familial pour partager des listes de courses et des plans de repas.",
+    "join": "Rejoindre le foyer",
+    "joined": "Vous avez rejoint !",
+    "sheet_title": "Inviter la famille",
+    "sheet_subtitle": "Toute personne avec ce lien peut s'inscrire et rejoindre votre foyer.",
+    "create": "Créer un lien d'invitation",
+    "expires_note": "Le lien expire dans 7 jours"
+  },
   "guest": {
     "viewing_list": "Liste partagée",
     "sign_up_prompt": "Créez un compte pour vos propres listes"
@@ -91,19 +103,80 @@
   "category": {
     "produce": "Fruits & légumes",
     "dairy": "Produits laitiers",
-    "meat": "Viandes, poissons & charcuterie",
-    "seafood": "Viandes, poissons & charcuterie",
+    "meat": "Viandes & charcuterie",
+    "seafood": "Poissons & fruits de mer",
     "frozen": "Surgelés",
     "pantry": "Épicerie / produits secs",
     "bakery": "Pain & pâtisserie",
     "drinks": "Boissons",
     "snacks": "Snacks & confiseries",
-    "hygiene": "Ménage & hygiène",
-    "cleaning": "Ménage & hygiène",
+    "hygiene": "Hygiène",
+    "cleaning": "Ménage & entretien",
     "pets": "Animaux",
     "baby": "Bébé",
     "pharmacy": "Pharmacie",
     "other": "Autre"
+  },
+  "recipe": {
+    "title": "Mes recettes",
+    "subtitle": "Enregistrez des liens de recettes, ajoutez des photos et parcourez par catégorie.",
+    "search": "Rechercher des recettes…",
+    "show_all": "Tout",
+    "add": "+ Ajouter une recette",
+    "add_title": "Ajouter une recette",
+    "edit_title": "Modifier la recette",
+    "name": "Nom de la recette",
+    "url": "URL de la recette (optionnel)",
+    "image_url": "URL de l'image (optionnel)",
+    "note": "Notes (optionnel)",
+    "open": "Ouvrir",
+    "edit": "Modifier",
+    "no_recipes": "Aucune recette — ajoutez la première ci-dessous.",
+    "no_results": "Aucune recette ne correspond à votre recherche.",
+    "photo": "Photo",
+    "change_photo": "Changer la photo",
+    "remove_photo": "Supprimer",
+    "upload_photo": "Importer depuis la bibliothèque"
+  },
+  "recipe_category": {
+    "meat": "Viande",
+    "fish": "Poisson",
+    "salads": "Salades",
+    "pasta": "Pâtes",
+    "vegetarian": "Végétarien",
+    "soups": "Soupes",
+    "desserts": "Desserts",
+    "other": "Autre",
+    "all": "Tout"
+  },
+  "template": {
+    "save_as": "Enregistrer comme modèle",
+    "label": "Modèle",
+    "template_name": "Nom du modèle",
+    "saved": "Enregistré comme modèle !",
+    "from_template": "Depuis un modèle",
+    "choose": "Choisir un modèle",
+    "no_templates": "Aucun modèle enregistré",
+    "items": "{{count}} articles",
+    "delete": "Supprimer le modèle"
+  },
+  "settings": {
+    "title": "Foyer",
+    "language": "Langue",
+    "appearance": "Apparence",
+    "dark_mode": "Mode sombre",
+    "sign_out": "Se déconnecter",
+    "show_onboarding": "Revoir l'introduction",
+    "delete_account": "Supprimer le compte",
+    "delete_account_title": "Supprimer le compte ?",
+    "delete_account_warning": "Cela supprimera définitivement votre compte et toutes vos données. Tous les membres du foyer perdront l'accès aux listes et recettes partagées. Cette action est irréversible.",
+    "delete_account_confirm": "Oui, tout supprimer",
+    "members": "Membres",
+    "role_owner": "Propriétaire",
+    "role_member": "Membre",
+    "remove_member_title": "Retirer le membre ?",
+    "remove_member_body": "Cela retirera {{name}} de votre foyer. Il/elle perdra l'accès à toutes les listes et recettes partagées.",
+    "remove_member_confirm": "Retirer"
   },
   "onboarding": {
     "slide1_title": "Bienvenue sur Lista",
@@ -112,9 +185,26 @@
     "slide2_subtitle": "Créez des listes, cochez les articles au fur et à mesure et suivez votre progression en temps réel",
     "slide3_title": "Importez en quelques secondes",
     "slide3_subtitle": "Prenez une photo d'une recette ou collez une URL — nous extrairons les articles pour vous",
+    "slide4_title": "Glissez pour agir",
+    "slide4_subtitle": "Glissez à droite pour modifier un article, à gauche pour le supprimer",
     "next": "Suivant",
     "get_started": "Commencer",
     "skip": "Passer"
+  },
+  "plan": {
+    "title": "Plan de repas",
+    "week": "Semaine {{n}}",
+    "add_dinner": "+ Ajouter un dîner",
+    "pick_recipe": "Choisir une recette",
+    "search_recipes": "Rechercher des recettes…",
+    "meal_placeholder": "ex. Pâtes bolognaise",
+    "remove": "Supprimer",
+    "no_recipes": "Aucune recette enregistrée",
+    "random_pick": "Tourner la roue",
+    "random_title": "Qu'est-ce qu'on mange ce soir ?",
+    "random_spin": "Tourner !",
+    "random_spinning": "En cours…",
+    "random_result": "Le dîner de ce soir"
   },
   "import": {
     "title": "Importer",
@@ -138,24 +228,5 @@
     "find_items": "Trouver les articles",
     "permission_camera": "L'accès à la caméra est nécessaire pour prendre des photos.",
     "permission_library": "L'accès à la photothèque est nécessaire."
-  },
-  "template": {
-    "save_as": "Enregistrer comme modèle",
-    "template_name": "Nom du modèle",
-    "saved": "Enregistré comme modèle !",
-    "from_template": "Depuis un modèle",
-    "choose": "Choisir un modèle",
-    "no_templates": "Aucun modèle enregistré",
-    "items": "{{count}} articles",
-    "delete": "Supprimer le modèle"
-  },
-  "settings": {
-    "title": "Foyer",
-    "language": "Langue",
-    "sign_out": "Se déconnecter",
-    "delete_account": "Supprimer le compte",
-    "delete_account_title": "Supprimer le compte ?",
-    "delete_account_warning": "Cela supprimera définitivement votre compte et toutes vos données. Tous les membres du foyer perdront l'accès aux listes et recettes partagées. Cette action est irréversible.",
-    "delete_account_confirm": "Oui, tout supprimer"
   }
 }
