@@ -12,8 +12,8 @@
       "supportsTablet": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSPhotoLibraryUsageDescription": "Köpa köpa köpa uses your photo library so you can import photos of recipes or shopping lists. The app analyzes the image to extract grocery items and add them to your list.",
-        "NSCameraUsageDescription": "Köpa köpa köpa uses the camera so you can take a photo of a recipe or handwritten shopping list. The app analyzes the photo to extract grocery items and add them to your list."
+        "NSPhotoLibraryUsageDescription": "Köpa köpa köpa needs access to your photo library to let you select a photo of a recipe or grocery list. For example, you can pick a photo of a recipe page and the app will read the ingredients and automatically add them as items to your shopping list.",
+        "NSCameraUsageDescription": "Köpa köpa köpa needs access to your camera to let you take a photo of a recipe or handwritten grocery list. For example, you can photograph a cookbook page and the app will read the ingredients and automatically add them as items to your shopping list."
       }
     },
     "android": {
