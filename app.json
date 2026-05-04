@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Lista",
+    "name": "Köpa köpa köpa",
     "slug": "grocery-list",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,7 +11,9 @@
       "bundleIdentifier": "com.erikfriberg.lista",
       "supportsTablet": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "Köpa köpa köpa uses your photo library so you can import photos of recipes or shopping lists. The app analyzes the image to extract grocery items and add them to your list.",
+        "NSCameraUsageDescription": "Köpa köpa köpa uses the camera so you can take a photo of a recipe or handwritten shopping list. The app analyzes the photo to extract grocery items and add them to your list."
       }
     },
     "android": {
