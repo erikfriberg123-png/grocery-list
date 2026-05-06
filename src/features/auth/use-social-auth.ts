@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Platform } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as WebBrowser from 'expo-web-browser';
@@ -44,6 +44,14 @@ async function signInWithApple(): Promise<void> {
 export function useSocialAuth() {
   const [loading, setLoading] = useState<'google' | 'apple' | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [appleAvailable, setAppleAvailable] = useState(false);
+
+  useEffect(() => {
+    if (Platform.OS !== 'ios') return;
+    AppleAuthentication.isAvailableAsync()
+      .then(setAppleAvailable)
+      .catch(() => setAppleAvailable(false));
+  }, []);
 
   const handleGoogle = async () => {
     setLoading('google');
@@ -52,7 +60,6 @@ export function useSocialAuth() {
       await signInWithGoogle();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
-      // Ignore user-initiated cancellations
       if (!msg.toLowerCase().includes('cancel') && msg !== 'dismiss') {
         setError(msg);
       }
@@ -68,6 +75,7 @@ export function useSocialAuth() {
       await signInWithApple();
     } catch (e: unknown) {
       const code = (e as { code?: string }).code;
+      // ERR_CANCELED = user dismissed the sheet; anything else is a real failure
       if (code !== 'ERR_CANCELED') {
         setError(e instanceof Error ? e.message : String(e));
       }
@@ -81,6 +89,6 @@ export function useSocialAuth() {
     handleApple,
     loading,
     error,
-    appleAvailable: Platform.OS === 'ios',
+    appleAvailable,
   };
 }
