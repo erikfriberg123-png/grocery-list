@@ -46,8 +46,7 @@
       "expo-localization",
       "expo-font",
       "expo-web-browser",
-      "expo-image",
-      "expo-apple-authentication"
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true

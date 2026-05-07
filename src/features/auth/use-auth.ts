@@ -19,5 +19,17 @@ export function useAuth() {
     if (error) throw error;
   }
 
-  return { session, user, initialized, signIn, signUp, signOut };
+  async function resetPassword(email: string) {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'grocerylist://reset-password',
+    });
+    if (error) throw error;
+  }
+
+  async function updatePassword(password: string) {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) throw error;
+  }
+
+  return { session, user, initialized, signIn, signUp, signOut, resetPassword, updatePassword };
 }

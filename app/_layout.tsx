@@ -4,6 +4,7 @@ import '../src/lib/i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CormorantGaramond_500Medium } from '@expo-google-fonts/cormorant-garamond';
 import { QueryClientProvider } from '@tanstack/react-query';
+import * as Linking from 'expo-linking';
 import { useFonts } from 'expo-font';
 import { useRouter, useSegments, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -55,15 +56,29 @@ function AuthGate() {
       setInitialized();
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
+      if (event === 'PASSWORD_RECOVERY') {
+        router.replace('/reset-password' as never);
+      }
     });
 
     AsyncStorage.getItem('onboarding_complete').then(val => {
       setOnboardingDone(val === 'true');
     });
 
-    return () => subscription.unsubscribe();
+    // Exchange the PKCE code (or parse hash tokens) from password-reset deep links
+    async function handleDeepLink(url: string) {
+      if (!url.includes('reset-password')) return;
+      await supabase.auth.exchangeCodeForSession(url).catch(() => {});
+    }
+    Linking.getInitialURL().then(url => { if (url) handleDeepLink(url); });
+    const { remove } = Linking.addEventListener('url', ({ url }) => handleDeepLink(url));
+
+    return () => {
+      subscription.unsubscribe();
+      remove();
+    };
   }, []);
 
   // Auto-accept a pending invite whenever a session becomes available
@@ -79,8 +94,10 @@ function AuthGate() {
     const inOnboarding = segments[0] === 'onboarding';
     const inTabs       = segments[0] === '(tabs)';
     const inInvite     = (segments[0] as string) === 'invite';
+    const inReset      = (segments[0] as string) === 'reset-password';
 
     if (session) {
+      if (inReset) return; // let the reset-password screen handle this
       if (!onboardingDone) {
         // Show onboarding even for logged-in users (e.g. "show intro again")
         if (!inOnboarding) router.replace('/onboarding');
@@ -88,8 +105,8 @@ function AuthGate() {
         if (inAuthGroup || inOnboarding) router.replace('/(tabs)');
       }
     } else {
-      // Invite links are public — show the invite page without redirecting
-      if (inInvite) return;
+      // Invite and reset links are public — show the page without redirecting
+      if (inInvite || inReset) return;
       if (onboardingDone) {
         if (!inAuthGroup) router.replace('/(auth)/sign-in');
       } else {
@@ -120,6 +137,7 @@ export default function RootLayout() {
           <Stack.Screen name="invite/[token]" options={{ headerShown: false }} />
           <Stack.Screen name="import" options={{ headerShown: false }} />
           <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
+          <Stack.Screen name="reset-password" options={{ headerShown: false }} />
         </Stack>
         <StatusBar style={isDark ? 'light' : 'dark'} />
       </QueryClientProvider>

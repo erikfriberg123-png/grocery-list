@@ -1,11 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
-  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -19,10 +18,16 @@ import { z } from 'zod';
 import { Colors } from '@/constants/colors';
 import { useAuth } from '@/src/features/auth/use-auth';
 
-const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-});
+const schema = z
+  .object({
+    password: z.string().min(8),
+    confirmPassword: z.string().min(8),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    path: ['confirmPassword'],
+    message: 'Passwords do not match',
+  });
+
 type FormData = z.infer<typeof schema>;
 
 const inputStyle = {
@@ -36,9 +41,10 @@ const inputStyle = {
   color: Colors.text,
 } as const;
 
-export default function SignIn() {
+export default function ResetPassword() {
   const { t } = useTranslation();
-  const { signIn } = useAuth();
+  const { updatePassword } = useAuth();
+  const router = useRouter();
   const [serverError, setServerError] = useState('');
 
   const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
@@ -48,7 +54,8 @@ export default function SignIn() {
   const onSubmit = async (data: FormData) => {
     try {
       setServerError('');
-      await signIn(data.email, data.password);
+      await updatePassword(data.password);
+      router.replace('/(tabs)');
     } catch (e) {
       setServerError(e instanceof Error ? e.message : t('common.error'));
     }
@@ -63,78 +70,30 @@ export default function SignIn() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
 
-        {/* Logo */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 48 }}>
-          <Image source={require('@/assets/images/logo-light.png')} style={{ width: 48, height: 48, borderRadius: 14 }} />
-          <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 30, color: Colors.greenDark }}>
-            Lista
-          </Text>
-        </View>
-
-        {/* Heading */}
         <Text style={{ fontFamily: 'CormorantGaramond_500Medium', fontSize: 36, color: Colors.greenDark, marginBottom: 6 }}>
-          {t('auth.welcome_back')}
+          {t('auth.new_password_title')}
         </Text>
-        <View style={{ flexDirection: 'row', gap: 4, marginBottom: 36 }}>
-          <Text style={{ fontSize: 15, color: Colors.muted }}>{t('auth.no_account')}</Text>
-          <Link href="/(auth)/sign-up">
-            <Text style={{ fontSize: 15, color: Colors.green, fontWeight: '600' }}>{t('auth.sign_up')}</Text>
-          </Link>
-        </View>
+        <Text style={{ fontSize: 15, color: Colors.muted, marginBottom: 36 }}>
+          {t('auth.new_password_hint')}
+        </Text>
 
-        {/* Server error */}
         {serverError ? (
           <View style={{ backgroundColor: '#fef2f2', borderRadius: 12, padding: 12, marginBottom: 16 }}>
             <Text style={{ color: '#b91c1c', fontSize: 13 }}>{serverError}</Text>
           </View>
         ) : null}
 
-        {/* Email */}
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <View style={{ marginBottom: 14 }}>
-              <Text style={{ fontSize: 13, fontWeight: '500', color: Colors.text, marginBottom: 6 }}>
-                {t('auth.email')}
-              </Text>
-              <TextInput
-                style={inputStyle}
-                autoCapitalize="none"
-                autoComplete="email"
-                keyboardType="email-address"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                placeholder={t('auth.email_placeholder')}
-                placeholderTextColor={Colors.muted}
-              />
-              {errors.email && (
-                <Text style={{ color: '#b91c1c', fontSize: 12, marginTop: 4 }}>
-                  {errors.email.message}
-                </Text>
-              )}
-            </View>
-          )}
-        />
-
-        {/* Password */}
         <Controller
           control={control}
           name="password"
           render={({ field: { onChange, onBlur, value } }) => (
-            <View style={{ marginBottom: 12 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                <Text style={{ fontSize: 13, fontWeight: '500', color: Colors.text }}>
-                  {t('auth.password')}
-                </Text>
-                <Link href="/(auth)/forgot-password">
-                  <Text style={{ fontSize: 13, color: Colors.green }}>{t('auth.forgot_password')}</Text>
-                </Link>
-              </View>
+            <View style={{ marginBottom: 14 }}>
+              <Text style={{ fontSize: 13, fontWeight: '500', color: Colors.text, marginBottom: 6 }}>
+                {t('auth.new_password')}
+              </Text>
               <TextInput
                 style={inputStyle}
-                autoComplete="current-password"
+                autoComplete="new-password"
                 secureTextEntry
                 onBlur={onBlur}
                 onChangeText={onChange}
@@ -151,9 +110,33 @@ export default function SignIn() {
           )}
         />
 
-        <View style={{ marginBottom: 20 }} />
+        <Controller
+          control={control}
+          name="confirmPassword"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <View style={{ marginBottom: 32 }}>
+              <Text style={{ fontSize: 13, fontWeight: '500', color: Colors.text, marginBottom: 6 }}>
+                {t('auth.confirm_password')}
+              </Text>
+              <TextInput
+                style={inputStyle}
+                autoComplete="new-password"
+                secureTextEntry
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                placeholder={t('auth.password_placeholder')}
+                placeholderTextColor={Colors.muted}
+              />
+              {errors.confirmPassword && (
+                <Text style={{ color: '#b91c1c', fontSize: 12, marginTop: 4 }}>
+                  {errors.confirmPassword.message}
+                </Text>
+              )}
+            </View>
+          )}
+        />
 
-        {/* Submit */}
         <Pressable
           style={({ pressed }) => ({
             backgroundColor: Colors.green,
@@ -171,9 +154,8 @@ export default function SignIn() {
           disabled={isSubmitting}>
           {isSubmitting
             ? <ActivityIndicator color="white" />
-            : <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>{t('auth.sign_in')}</Text>}
+            : <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>{t('auth.save_password')}</Text>}
         </Pressable>
-
       </ScrollView>
     </KeyboardAvoidingView>
   );

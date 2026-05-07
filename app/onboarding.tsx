@@ -24,7 +24,6 @@ import { Colors } from '@/constants/colors';
 import { useAuthStore } from '@/src/features/auth/store';
 import { supabase } from '@/src/lib/supabase';
 import { SUPPORTED_LANGUAGES, useLanguage, type LangCode } from '@/src/features/language/use-language';
-import { SocialAuthButtons } from '@/src/components/SocialAuthButtons';
 
 const { width } = Dimensions.get('window');
 
@@ -275,9 +274,6 @@ function AuthStep({ onBack }: { onBack: () => void }) {
                 ? <ActivityIndicator color="white" />
                 : <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>{t('auth.sign_in')}</Text>}
             </Pressable>
-            <View style={{ marginTop: 8 }}>
-              <SocialAuthButtons onError={setServerError} />
-            </View>
           </>
         ) : (
           <>
@@ -348,9 +344,6 @@ function AuthStep({ onBack }: { onBack: () => void }) {
                 ? <ActivityIndicator color="white" />
                 : <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>{t('auth.sign_up')}</Text>}
             </Pressable>
-            <View style={{ marginTop: 8 }}>
-              <SocialAuthButtons onError={setServerError} />
-            </View>
           </>
         )}
       </ScrollView>
